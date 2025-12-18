@@ -13,38 +13,39 @@ const axios = require('axios');
 const app = express();
 
 const UNIV_FILE_MAP = {
-    '서울대학교': 'ssu_snu.pdf', '서울대': 'ssu_snu.pdf',
-    '연세대학교': 'ssu_yonsei.pdf', '연세대': 'ssu_yonsei.pdf',
-    '고려대학교': 'ssu_korea.pdf', '고려대': 'ssu_korea.pdf',
-    '서강대학교': 'ssu_sogang.pdf', '서강대': 'ssu_sogang.pdf',
-    '한양대학교': 'ssu_hanyang.pdf', '한양대': 'ssu_hanyang.pdf',
-    '중앙대학교': 'ssu_cau.pdf', '중앙대': 'ssu_cau.pdf',
-    '경희대학교': 'ssu_khu.pdf', '경희대': 'ssu_khu.pdf',
-    '한국외국어대학교': 'ssu_hufs.pdf', '한국외대': 'ssu_hufs.pdf',
-    '서울시립대학교': 'ssu_su.pdf', '서울시립대': 'ssu_su.pdf',
-    '이화여자대학교': 'ssu_ewha.pdf', '이화여대': 'ssu_ewha.pdf',
-    '건국대학교': 'ssu_konkuk.pdf', '건국대': 'ssu_konkuk.pdf',
-    '동국대학교': 'ssu_dongguk.pdf', '동국대': 'ssu_dongguk.pdf',
-    '홍익대학교': 'ssu_hongik.pdf', '홍익대': 'ssu_hongik.pdf',
-    '숙명여자대학교': 'ssu_sookmyung.pdf', '숙명여대': 'ssu_sookmyung.pdf',
-    '국민대학교': 'ssu_kookmin.pdf', '국민대': 'ssu_kookmin.pdf',
-    '숭실대학교': 'ssu_soongsil.pdf', '숭실대': 'ssu_soongsil.pdf',
-    '세종대학교': 'ssu_sejong.pdf', '세종대': 'ssu_sejong.pdf',
-    '단국대학교': 'ssu_dankook.pdf', '단국대': 'ssu_dankook.pdf',
-    'KAIST': 'ssu_kaist.pdf',
-    'POSTECH': 'ssu_postech.pdf',
-    '서울교육대학교': 'ssu_snue.pdf', '서울교육대': 'ssu_snue.pdf',
-    '서울과학기술대학교': 'ssu_seoultech.pdf', '서울과학기술대': 'ssu_seoultech.pdf',
-    '육군사관학교': 'ssu_kma.pdf',
-    '광운대학교': 'ssu_kwangwoon.pdf', '광운대': 'ssu_kwangwoon.pdf',
-    '명지대학교': 'ssu_myongji.pdf', '명지대': 'ssu_myongji.pdf',
-    '상명대학교': 'ssu_sangmyung.pdf', '상명대': 'ssu_sangmyung.pdf',
-    '덕성여자대학교': 'ssu_duksung.pdf', '덕성여대': 'ssu_duksung.pdf',
-    '동덕여자대학교': 'ssu_dongduk.pdf', '동덕여대': 'ssu_dongduk.pdf',
-    '가천대학교': 'ssu_gachon.pdf', '가천대': 'ssu_gachon.pdf',
-    '인하대학교': 'ssu_inha.pdf', '인하대': 'ssu_inha.pdf',
-    '인천대학교': 'ssu_incheon.pdf', '인천대': 'ssu_incheon.pdf',
-    '한성대학교': 'ssu_hansung.pdf', '한성대': 'ssu_hansung.pdf'
+    "서울대학교" : "https://drive.google.com/file/d/1CNtmjhLL4nDoLjS0uOuqYsrJSITxsG8b/preview",
+    "연세대학교" : "https://drive.google.com/file/d/1hucXBDJijeNwO6c53_xy-MoC2V9tOLre/preview",
+    "고려대학교" : "https://drive.google.com/file/d/1m_YitavEN6xyoDmcH5ATwyF0zB_8D4PJ/preview",
+    "서강대학교" : "https://drive.google.com/file/d/1IKctjHoq15yHue069dpEphYXJqrLSr_Q/preview",
+    "성균관대학교" : "https://drive.google.com/file/d/17r_G4UOW_c3r5rdchKB9uyd2Xd4os_Zj/preview",
+    "한양대학교" : "https://drive.google.com/file/d/1VSnKOas4XCQN-LP6eI10ReoSfBk9CEiB/preview",
+    "중앙대학교" : "https://drive.google.com/file/d/11QUTYjKWWHXkzZVH_pzT9KLNCgUtVm0R/preview",
+    "경희대학교" : "https://drive.google.com/file/d/1x4gYtMHu4DuYEVwZa2UEqBHXFpvUjQF6/preview",
+    "한국외국어대학교" : "https://drive.google.com/file/d/1VQxeIBm8IdniB-Pn0B_a5K1dmyiJtxtG/preview",
+    "서울시립대학교" : "https://drive.google.com/file/d/1bUJLf2XHiBIOb2wh5mzggCvZ8lQia1Dr/preview",
+    "이화여자대학교" : "https://drive.google.com/file/d/1_spcNTAfhRaImDHQ5YwoU_jcw4F6FFvh/preview",
+    "건국대학교" : "https://drive.google.com/file/d/1lFZfpj9CoTHX6RNhN4g5Bj2JmDakzmWI/preview",
+    "동국대학교" : "https://drive.google.com/file/d/18WN2JJ10Li1fIs3QsDJjxRWFkBUpbLWn/preview",
+    "홍익대학교" : "https://drive.google.com/file/d/1fjRiLTClbh2EXSNprib0ytRTlGa0dOWd/preview",
+    "숙명여자대학교" : "https://drive.google.com/file/d/1BBVvnAbBTz3NV82_AJp7kLqRnYg0akUA/preview",
+    "국민대학교" : "https://drive.google.com/file/d/1f5It2i3rVEk09ZQu7TnquEsW2w3ndRTc/preview",
+    "숭실대학교" : "https://drive.google.com/file/d/1ZKsS-zbDkc8PmgAUQO1ozgmTkTLpqZyi/preview",
+    "세종대학교" : "https://drive.google.com/file/d/1CpIXRWBLGfrFmrBZcXdYEjfZu2Oj6nle/preview",
+    "단국대학교" : "https://drive.google.com/file/d/19SPp8Zs9i3Adl1mEV3paJzB05uR3nfmJ/preview",
+    "KAIST" : "https://drive.google.com/file/d/1u4DvemUX-iqMKMIjAy2uHGVwaG5xwL8r/preview",
+    "POSTECH": "https://drive.google.com/file/d/1Vqn-kITH7VDkki_cdGoWLTDzKje1Lq2c/preview",
+    "서울교육대학교" : "https://drive.google.com/file/d/1rWIlak0o3eWPy60XlOc7hGlaPJ00jC__/preview",
+    "서울과학기술대학교" : "https://drive.google.com/file/d/1kG16tlAaEZcdUEMdSIceyecAAwBqEYbX/preview",
+    '육군사관학교' : 'https://drive.google.com/file/d/19W2Fpo1SBCkVDfDCRSI9HjWE3weUsN3Z/preview',
+    '광운대학교' : 'https://drive.google.com/file/d/1CssecwLhgpZ14X2zmJ9LRMqcpuBdUctG/preview',
+    '명지대학교' : 'https://drive.google.com/file/d/11C7L0UELFrtsA4G6icUL4Wn5bCwMGsoQ/preview',
+    '상명대학교' : 'https://drive.google.com/file/d/1k4WYO9RgfhNw6dft7tdZwe_MVAhPs--j/preview',
+    '덕성여자대학교' : 'https://drive.google.com/file/d/1qIp4MOZ7Vzr0EIi-nCIDdxwCPOaOXzfx/preview',
+    '동덕여자대학교' : 'https://drive.google.com/file/d/1_NueMcZwLx-fVDLDr0ve9z9juZ2CDxWI/preview',
+    "가천대학교" : "https://drive.google.com/file/d/1ELpGFM94YMnKwwHwpTXeBesENdl68h8O/preview",
+    "인하대학교" : "https://drive.google.com/file/d/1X1UEk_FwG99Bwsa81POos-aSX7M8AryW/preview",
+    "인천대학교" : "https://drive.google.com/file/d/130pK_8QD3xuZK-HtzdY1sbczAvl9d0Kq/preview",
+    "한성대학교": "https://drive.google.com/file/d/1gVbNkb7JAJP-0z9j0VKOt7Z_ehGo-992/preview"
 };
 
 app.use(express.json({ limit: "50mb" }));
@@ -469,5 +470,4 @@ app.get('/api/essay-history', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 서버 실행 중 → http://localhost:${PORT}`);
-
 });
