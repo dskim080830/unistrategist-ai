@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #333;
+    }
+
+    form {
+        background: #ffffff;
+        padding: 60px 50px; 
+        max-width: 480px;   
+        
+        width: 100%;
+        border-radius: 20px; 
+        box-shadow: 0 15px 35px rgba(108, 71, 255, 0.15); 
+        transition: transform 0.3s ease;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 32px;   
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+
+    input {
+        width: 100%;
+        padding: 16px 20px; 
+        margin-bottom: 20px; 
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        font-size: 16px;     
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    input::placeholder {
+        color: #94a3b8;
+    }
+
+    input:focus {
+        border-color: #6c47ff;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(108, 71, 255, 0.1); 
+    }
+
+    button {
+        width: 100%;
+        padding: 18px;     
+        margin-top: 10px;
+        background: #6c47ff;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;    
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+        background: #5636d6;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 24px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 15px;
+        transition: color 0.2s;
+    }
+
+    a:hover {
+        color: #6c47ff;
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+<form action="/login" method="POST">
+    <h2>로그인</h2>
+    <input type="text" name="username" placeholder="아이디" required autocomplete="off">
+    <input type="password" name="password" placeholder="비밀번호" required>
+    <button type="submit">로그인</button>
+    <a href="/signup.html">계정이 없으신가요? 회원가입</a>
+</form>
+</body>
+</html>
