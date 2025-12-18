@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniStrategist AI - 특성화고 특별전형 분석</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    background: #f5f7fa;
+    overflow-x: hidden;
+    color: #333;
+}
+
+a { text-decoration: none; color: inherit; }
+* { box-sizing: border-box; }
+
+:root {
+    --primary-color: #6c47ff;
+    --primary-light: #eef2ff;
+    --text-main: #222;
+    --text-sub: #555;
+    --danger-bg: #fff1f2;
+    --danger-text: #be123c;
+    --success-bg: #ecfdf5;
+    --success-text: #047857;
+    --badge-bg: #f3f4f6;
+    --badge-text: #4b5563;
+}
+
+.navbar {
+    width: 100%;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6e6e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-cap { width: 26px; height: 26px; }
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #222;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 15px;
+    margin-left: 20px;
+}
+
+.nav-menu a {
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    transition: color 0.2s;
+}
+
+.nav-menu a:hover, .nav-menu a.active { color: var(--primary-color); font-weight: 700; }
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.btn-outline:hover { background: var(--primary-light); }
+
+.btn {
+    background: var(--primary-color);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.btn:hover { background: #5835e5; }
+
+.hero {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    padding: 0 5%;
+}
+
+.hero-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: var(--text-main);
+}
+
+.hero-sub {
+    font-size: 16px;
+    color: var(--text-sub);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 5%;
+}
+
+.alert-banner {
+    background-color: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.alert-susi {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    padding: 10px 24px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 99px;
+    font-weight: 600;
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(108, 71, 255, 0.3);
+}
+
+.univ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.univ-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.univ-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(108, 71, 255, 0.15);
+    border-color: var(--primary-color);
+}
+
+.univ-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.univ-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 15px;
+}
+
+.tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+}
+
+.tag-ga { background: #e0f2fe; color: #0369a1; }
+.tag-na { background: #f0fdf4; color: #15803d; }
+.tag-da { background: #fdf4ff; color: #86198f; }
+.tag-kyoka { background: #eff6ff; color: #1d4ed8; }
+.tag-jonghap { background: #fff7ed; color: #c2410c; }
+.tag-new { background: #fff1f2; color: #be123c; }
+
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+    display: none; justify-content: center; align-items: center; z-index: 2000;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+    background: white; width: 90%; max-width: 800px; max-height: 85vh;
+    border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+    background: white;
+}
+.modal-title { font-size: 20px; font-weight: 800; color: var(--primary-color); }
+.close-btn { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; }
+
+.modal-body { padding: 0; overflow-y: auto; background: #f9fafb; }
+
+.data-section { padding: 25px; background: white; margin-bottom: 10px; }
+.section-title {
+    font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 15px;
+    display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: ''; width: 4px; height: 18px; background: var(--primary-color); border-radius: 2px; }
+
+.dept-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
+.dept-table th { background: #f3f4f6; padding: 12px; text-align: left; color: #555; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+.dept-table td { padding: 12px; border-bottom: 1px solid #f3f4f6; color: #333; vertical-align: middle; }
+.dept-table tr:hover { background: #f9fafb; }
+
+.opt-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
+    display: inline-block; text-align: center;
+}
+.opt-social { background: #fff7ed; color: #c2410c; } 
+.opt-nature { background: #ecfdf5; color: #047857; } 
+.opt-human { background: #eff6ff; color: #1d4ed8; } 
+.opt-art { background: #fdf4ff; color: #a21caf; } 
+.opt-default { background: #f3f4f6; color: #4b5563; }
+
+.count-badge { display: inline-block; padding: 3px 8px; border-radius: 99px; font-weight: 700; font-size: 12px; }
+.cb-zero { background: #f3f4f6; color: #9ca3af; }
+.cb-val { background: #eff6ff; color: #2563eb; }
+
+.desc-text { white-space: pre-line; color: #4b5563; font-size: 15px; line-height: 1.6; }
+.warning-box {
+    margin: 20px; padding: 15px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 8px;
+    color: #9f1239; font-size: 13px; font-weight: 600; text-align: center;
+}
+
+
+@media (max-width: 900px) {
+    .nav-left, .nav-right { flex: 1 1 100%; justify-content: flex-start; }
+    .nav-right { margin-top: 10px; justify-content: flex-end; }
+    .nav-menu { flex-wrap: wrap; gap: 10px; margin-left: 0; margin-top: 10px; }
+    .hero-title { font-size: 26px; }
+    .navbar { flex-wrap: wrap; padding: 15px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <svg class="icon-cap" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L1 9l11 6 9-4.9V17h2V9L12 3z" fill="#6c47ff"/>
+            <path d="M11 21a4 4 0 008 0v-5l-8 4v1z" fill="#6c47ff" />
+        </svg>
+        <a href="/" class="logo-text">UniStrategist AI</a>
+        <div class="nav-menu">
+            <a href="/">홈</a>
+            <a href="/analysis">생기부 분석</a>
+            <a href="#">모의 논술</a>
+            <a href="#" class="active" style="color:#6c47ff;">특성화고 특별 전형</a>
+            <a href="#">대학별 내신 계산기</a>
+            <a href="univ.html">대학 모집 요강</a>
+        </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+        <a href="/login.html" class="btn-outline">로그인</a>
+        <a href="/signup.html" class="btn">회원가입</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-title">2026 인서울 특성화고 특별전형 분석</div>
+    <div class="hero-sub">
+        수시 및 정시 특별전형 모집단위와 전형 방법을 분석했습니다.<br>
+        2026학년도 최신 전형계획을 반영하고 있습니다.
+    </div>
+</section>
+
+<div class="container">
+    <div class="alert-banner" id="alert-banner">
+        </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('jeongsi')">정시 모집 (Jeongsi)</button>
+        <button class="tab-btn" onclick="switchTab('susi')">수시 모집 (Susi)</button>
+    </div>
+
+    <div class="univ-grid" id="univ-grid">
+        </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="m-title" class="modal-title">대학명</h2>
+            <button onclick="closeModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="data-section">
+                <div class="section-title">📊 모집단위 및 인원</div>
+                <div style="overflow-x:auto;">
+                    <table class="dept-table">
+                        <thead>
+                            <tr id="table-header">
+                                </tr>
+                        </thead>
+                        <tbody id="m-table">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <div class="section-title">💡 전형 특징 및 분석</div>
+                <div id="m-desc" class="desc-text"></div>
+            </div>
+
+            <div class="warning-box" id="m-warning">
+                ※ 위 정보는 2026 전형계획 기준입니다. 원서 접수 전 반드시 최종 요강을 확인하세요.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    fetch('/api/session')
+    .then(res => res.json())
+    .then(data => {
+        if(data.loggedIn){
+            const navRight = document.getElementById('nav-right');
+            navRight.innerHTML = `
+                <span style="font-size:14px; color:#444; font-weight:600; margin-right:10px;">환영합니다, ${data.name}님</span>
+                <a href="/logout" class="btn-outline">로그아웃</a>
+            `;
+        }
+    })
+    .catch(err => console.log('Session check skipped (static mode)'));
+
+    const jeongsiUniversities = [
+        {
+            name: "경희대학교",
+            tags: ["가군", "나군", "학과별선발"],
+            desc: "▶ **학과별 개별 선발**\n 수능 반영 비율 : 국어 30%, 수학 30%, 탐구 2과목(단, 예술 계열은 1과목) => 사회 계열 25%, 자연/예술 계열 30% 반영, 영어 => 등급별 환산점수, 한국사 반영방법 => 감점",
+            details: [
+                { gun: "가", opt: "사회", dept: "정치외교학과", count: "2", note: ""},
+                { gun: "가", opt: "사회", dept: "행정학과", count: "2", note: ""},
+                { gun: "가", opt: "사회", dept: "사회학과", count: "2", note: ""},
+                { gun: "가", opt: "사회", dept: "경제학과", count: "3", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "사회", dept: "무역학과", count: "3", note: ""},
+                { gun: "가", opt: "사회", dept: "미디어학과", count: "3", note: ""},
+                { gun: "가", opt: "사회", dept: "경영학과", count: "6", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "사회", dept: "회계·세무학과", count: "3", note: ""},
+                { gun: "가", opt: "사회", dept: "Hospitality경영학과", count: "5", note: ""},
+                { gun: "가", opt: "사회", dept: "조리&푸드디자인학과", count: "3", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "사회", dept: "관광·엔터테인먼트학부", count: "3", note: ""},
+                { gun: "가", opt: "자연", dept: "전자정보공학부 전자공학과", count: "3", note: ""},
+                { gun: "가", opt: "자연", dept: "컴퓨터공학부 컴퓨터공학과", count: "3", note: ""},
+                { gun: "가", opt: "자연", dept: "소프트웨어융합학과", count: "3", note: "" },
+                { gun: "나", opt: "자연", dept: "기계공학과", count: "3", note: "" },
+                { gun: "나", opt: "자연", dept: "산업경영공학과", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "화학공학과", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "신소재공학과", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "건축학과", count: "2", note: "5년제" },
+                { gun: "나", opt: "예술", dept: "산업디자인학과", count: "3", note: "" },
+                { gun: "나", opt: "예술", dept: "시각디자인학과", count: "3", note: "" },
+                { gun: "나", opt: "예술", dept: "환경조경디자인학과", count: "2", note: "교직과정 개설 학과" },
+                { gun: "나", opt: "예술", dept: "의류디자인학과", count: "3", note: "교직과정 개설 학과" },
+                { gun: "나", opt: "예술", dept: "디지털콘텐츠학과", count: "3", note: "" }
+            ]
+        },
+        {
+            name: "세종대학교",
+            tags: ["가군", "나군", "학과별선발"],
+            desc: "▶ **학과별 모집 인원 확정**\n- 특성화고 특별전형 정시 인원이 비교적 명확히 정해져 있는 대학입니다.\n- 경영학부 등 주요 학과의 선발 인원이 배정되어 있습니다.",
+            details: [
+                { gun: "가", opt: "인문", dept: "인문사회계열", count: "1", note: ""},
+                { gun: "나", opt: "인문", dept: "경상호텔관광계열", count: "6", note: "" },
+                { gun: "가", opt: "자연", dept: "자연생명계열", count: "3", note: "" },
+                { gun: "가", opt: "자연", dept: "IT계열", count: "11", note: "" },
+                { gun: "나", opt: "자연", dept: "AI로봇학과", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "인공지능데이터사이언스학과", count: "1", note: "" },
+                { gun: "나", opt: "자연", dept: "콘텐츠소프트웨어학과", count: "1", note: "" },
+                { gun: "나", opt: "자연", dept: "공과계열", count: "11", note: "" },
+                { gun: "가", opt: "자연", dept: "우주항공시스템공학부(지능형드론융합전공)", count: "1", note: "" }
+            ]
+        },
+        {
+            name: "숭실대학교",
+            tags: ["가군", "나군", "다군"],
+            desc: "▶ 총 28명 선발",
+            details: [
+                { gun: "가", opt: "인문", dept: "경제학과", count: "3", note: "교직과정 개설 학과" },
+                { gun: "가", opt: "인문", dept: "글로벌통상학과", count: "2", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "인문", dept: "경영학부", count: "3", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "인문", dept: "회계학과", count: "3", note: "교직과정 개설 학과"},
+                { gun: "가", opt: "인문", dept: "벤처중소기업학과", count: "3", note: ""},
+                { gun: "다", opt: "인문", dept: "전기공학부", count: "2", note: "교직과정 개설 학과"},
+                { gun: "다", opt: "자연", dept: "기계공학부", count: "2", note: "" },
+                { gun: "다", opt: "자연", dept: "컴퓨터학부", count: "3", note: "" },
+                { gun: "다", opt: "자연", dept: "전자정보공학부(전자공학전공)", count: "2", note: "교직과정 개설 학과" },
+                { gun: "나", opt: "자연", dept: "전자정보공학부(IT융합전공)", count: "2", note: "교직과정 개설 학과" },
+                { gun: "다", opt: "자연", dept: "글로벌미디어학부", count: "3", note: "" },
+            ]
+        },
+        {
+            name: "서강대학교",
+            tags: ["나군"],
+            desc: "▶ 수능최저학력기준이 있다. (국,수,영,탐 4개 영역 중 3개 영역 등급 합 9 이내이고 한국사 4등급 이내) ",
+            details: [
+                { gun: "나", opt: "인문", dept: "경제학과, 경영학부, 신문방송학과, 미디어&엔터테인먼트학과", count: "5", note: "4개 과 합쳐서 총 5명 모집" },
+                { gun: "나", opt: "자연", dept: "전자공학과, 컴퓨터공학과, 화공생명학과, 기계공학과, 인공지능학과", count: "4", note: "5개 과 합쳐서 총 4명 모집" }
+            ]
+        },
+        {
+            name: "서울시립대학교",
+            tags: ["가군", "나군", "계열선발"],
+            desc: "▶ **계열별(I, II) 통합 선발**\n- 학과별이 아닌 인문 I/II, 자연 I/II 계열 단위로 묶어서 선발합니다.",
+            details: [
+                { gun: "나", opt: "인문I", dept: "행정학과", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "인문I", dept: "국제관계학과", count: "1", note: "" },
+                { gun: "나", opt: "인문II", dept: "경제학부", count: "1", note: "" },
+                { gun: "나", opt: "인문I", dept: "사회복지학과", count: "1", note: ""},
+                { gun: "나", opt: "인문II", dept: "세무학과", count: "1", note: "" },
+                { gun: "가", opt: "인문I", dept: "도시행정학과", count: "1", note: ""},
+                { gun: "나", opt: "인문I", dept: "도시사회학과", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "전자전기컴퓨터공학부", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "화학공학과", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연I", dept: "기계정보공학과", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "신소재공학과", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연I", dept: "토목공학과", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연I", dept: "컴퓨터과학부", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "수학과", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "통계학과", count: "1", note: "" },
+                { gun: "나", opt: "자연I", dept: "물리학과", count: "1", note: "" },
+                { gun: "나", opt: "자연II", dept: "생명과학과", count: "1", note: "" },
+                { gun: "나", opt: "자연III", dept: "환경원예학과", count: "1", note: "" },
+                { gun: "나", opt: "자연III", dept: "건축학부(건축공학전공)", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연III", dept: "건축학부(건축학전공)", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연I", dept: "도시공학과", count: "1", note: "" },
+                { gun: "나", opt: "자연III", dept: "교통공학과", count: "1", note: "" },
+                { gun: "나", opt: "자연III", dept: "조경학과", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연II", dept: "환경공학부", count: "1", note: "교직개설 과정 학과" },
+                { gun: "나", opt: "자연I", dept: "공간정보공학과", count: "1", note: "" },
+            ]
+        },
+        {
+        name: "고려대학교",
+        tags: ["가군", "학과별선발"],
+        desc: "▶ 특성화고 특별전형(정시)\n- 모집단위별 최대 2명 이내 선발, 전체 25명 이내 최종 선발\n- ★ 전공자율선택제 모집단위, * 교직과정 설치 모집단위\n- 수능 반영방법 및 동일계열 기준은 모집요강 참고",
+        details: [
+                { gun: "가", opt: "인문", dept: "경영학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "국어국문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "철학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "한국사학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "사학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "사회학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "한문학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "영어영문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "독어독문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "불어불문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "중어중문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "노어노문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "일어일문학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "서어서문학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "언어학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "생명과학부*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "식품생명공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "환경생태공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "식품자원경제학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "정치외교학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "경제학부*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "통계학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "행정학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "수학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "물리학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "화학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "지구환경과학과*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "화공생명공학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "신소재공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "건축사회환경공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "건축학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "기계공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "산업경영공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "전기전자공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "융합에너지공학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "간호대학*", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "컴퓨터학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "데이터과학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "인공지능학과", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "국제학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "미디어학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "바이오의공학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "바이오시스템의과학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "보건정책관리학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "자유전공학부★", count: "최대 2", note: "" },
+                { gun: "가", opt: "자연", dept: "스마트보안학부", count: "최대 2", note: "" },
+                { gun: "가", opt: "인문", dept: "심리학부*", count: "최대 2", note: "" }
+            ]
+        },
+        {
+            name: "연세대학교",
+            tags: ["가군"],
+            desc: "▶ 모집계열을 인문/자연/통합으로 함. 총 모집인원이 24명임(인문 12명, 자연 10명, 통합 2명), 각 과별 최대 1명 선발",
+            details: [
+                { gun: "가", opt: "인문", dept: "국어국문학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "중어중문학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "영어영문학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "독어독문학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "노어노문학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "사학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "철학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "문헌정보학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "심리학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "경제학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "응용통계학과", count: "최대 1", note: ""},
+                { gun: "가", opt: "인문", dept: "경영학과", count: "최대 1", note: ""},
+                { gun: "가", opt: "자연", dept: "수학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "물리학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "화학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "지구시스템과학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "천문우주학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "대기과학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "화공생명공학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "전기전자공학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "건축공학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "도시공학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "사회환경시스템공학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "기계공학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "신소재공학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "산업공학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "시스템생물학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "생화학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "생명공학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "첨단컴퓨팅학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "IT융합공학전공", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "지능형반도체전공", count: "최대 1", note: "" },
+                { gun: "가", opt: "자연", dept: "모빌리티시스템전공", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "정치외교학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "행정학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "사회복지학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "사회학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문", dept: "언론홍보영상학부", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "의류환경학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "식품영양학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "실내건축학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "아동·가족학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "통합디자인학과", count: "최대 1", note: "" },
+                { gun: "가", opt: "인문/자연", dept: "간호학과", count: "최대 1", note: "" }
+            ]
+        },
+        {
+            name: "한양대학교",
+            tags: ["가군", "나군"],
+            desc: "▶ **단과대 통합 + 학과별 혼합**\n- 가군: 공과대학 등 단과대 단위 / 나군: 학과별 선발",
+            details: [
+                { gun: "가", opt: "자연", dept: "건축학부", count: "2", note: "" },
+                { gun: "가", opt: "자연", dept: "건축공학부", count: "2", note: "" },
+                { gun: "가", opt: "자연", dept: "건설환경공학과", count: "2", note: "" },
+                { gun: "가", opt: "자연", dept: "도시공학과", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "자원환경공학과", count: "1", note: "" },
+                { gun: "나", opt: "상경", dept: "정보시스템학과(상경)", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "전기·생체공학부(전기공학)", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "전기·생체공학부(바이오메디컬공학)", count: "1", note: "" },
+                { gun: "나", opt: "자연", dept: "신소재공학부", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "유기나노공학과", count: "1", note: "" },
+                { gun: "나", opt: "자연", dept: "화학공학과", count: "2", note: "" },
+                { gun: "가", opt: "자연", dept: "기계공학부", count: "3", note: "" },
+                { gun: "가", opt: "자연", dept: "원자력공학과", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "산업공학과", count: "2", note: "" },
+                { gun: "가", opt: "상경", dept: "경제금융학부", count: "3", note: "" },
+                { gun: "가", opt: "상경", dept: "경영학부", count: "3", note: "" },
+                { gun: "나", opt: "인문", dept: "관광학부", count: "2", note: "" },
+                { gun: "가", opt: "인문", dept: "의류학과", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "식품영양학과", count: "1", note: "" },
+                { gun: "가", opt: "인문", dept: "실내건축디자인학과", count: "1", note: "" },
+                { gun: "가", opt: "자연", dept: "간호학과", count: "2", note: "" },
+            ]
+        },
+        {
+            name: "중앙대학교",
+            tags: ["가군", "나군", "다군"],
+            desc: "▶ **단과대학별 모집**\n- 다군(경영경제, 창의ICT) 선발 규모가 큽니다.",
+            details: [
+                { gun: "나", opt: "인문", dept: "경제학부", count: "5", note: "" },
+                { gun: "다", opt: "인문", dept: "경영학부", count: "7", note: "" },
+                { gun: "나", opt: "자연", dept: "에너지시스템공학부", count: "4", note: "" },
+                { gun: "가", opt: "자연", dept: "기계공학부", count: "5", note: "" },
+                { gun: "다", opt: "자연", dept: "전자전기공학부", count: "5", note: "" },
+                { gun: "다", opt: "자연", dept: "소프트웨어학부", count: "4", note: "" },
+            ]
+        },
+        {
+            name: "동국대학교",
+            tags: ["가군", "나군"],
+            desc: "▶ 가, 나군으로 나누어 선발",
+            details: [
+                { gun: "가", opt: "인문", dept: "국제통상학과", count: "2", note: "" },
+                { gun: "가", opt: "인문", dept: "경영정보학과", count: "2", note: "" },
+                { gun: "가", opt: "자연", dept: "전자전기공학부", count: "2", note: "" },
+                { gun: "나", opt: "인문", dept: "경영학과", count: "2", note: "" },
+                { gun: "나", opt: "자연", dept: "컴퓨터·AI학부", count: "2", note: "" }
+            ]
+        },
+        {
+            name: "홍익대학교(서울)",
+            tags: ["나군", "다군"],
+            desc: "▶ 미술계열 서류평가시 학교생활기록부에 기재된 학교폭력조치사항을 반영함. ",
+            details: [
+                { gun: "다", opt: "자연", dept: "전자·전기공학부", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "신소재·화공시스템공학부", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "컴퓨터공학과", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "산업·데이터공학과", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "기계·시스템디자인공학과", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "건설환경공학과", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "건축학부 건축학전공(5년제)", count: "1", note: "" },
+                { gun: "다", opt: "자연", dept: "도시공학과", count: "1", note: "" },
+                { gun: "다", opt: "인문", dept: "경영학부", count: "1", note: "" },
+                { gun: "나", opt: "미술", dept: "디자인학부", count: "1", note: "" },
+                { gun: "나", opt: "미술", dept: "금속조형디자인과", count: "1", note: "" },
+                { gun: "나", opt: "미술", dept: "도예·유리과", count: "1", note: "" },
+                { gun: "나", opt: "미술", dept: "목조형가구학과", count: "1", note: "" },
+                { gun: "나", opt: "미술", dept: "섬유미술·패션디자인과", count: "1", note: "" }
+            ]
+        }
+    ];
+
+    // Susi Data (Based on 2026 PDF)
+    const susiUniversities = [
+        {
+            name: "서강대학교",
+            tags: ["학생부종합", "신설"],
+            desc: "▶ **2026학년도 신설**\n- 2026학년도부터 특성화고교졸업자 전형을 수시에서 신규 선발합니다.\n- **1단계 => 서류 100% \n 2단계 => 1단계 성적 80% + 면접 20% \n- 수능 최저학력기준은 적용하지 않습니다.",
+            details: [
+                { gun: '학생부종합', opt: "인문", dept: "경제학과, 경영학부, 지식융합미디어학부", count: "3", note: "3개 과 합쳐서 총 3명 모집" },
+                { gun: '학생부종합', opt: "자연", dept: "전자공학과, 화공생명공학과, 기계공학과, 반도체공학과, 컴퓨터공학과, 인공지능학과", count: "3", note: "6개 과 합쳐서 총 3명 모집"}
+            ]
+        },
+        {
+            name: "가천대학교",
+            tags: ["학생부교과", "면접"],
+            desc: "▶ **학생부교과 위주 + 면접*",
+            details: [
+                { gun: "교과", opt: "인문", dept: "경영학부", count: "4", note: "" },
+                { gun: "교과", opt: "인문", dept: "법과대학", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "미디어커뮤니케이션학과", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "관광경영학과", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "의료산업경영학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "사회복지학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "패션산업학과", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "도시계획ㆍ조경학부", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "건축학부", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "전기공학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "화공생명베터리공학부", count: "5", note: "" },
+                { gun: "교과", opt: "자연", dept: "기계공학부", count: "4", note: "" },
+                { gun: "교과", opt: "자연", dept: "건설환경공학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "신소재공학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "식품생명공학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "식품영양학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "컴퓨터공학과", count: "4", note: "" },
+                { gun: "교과", opt: "자연", dept: "반도체대학", count: "5", note: "" },
+                { gun: "교과", opt: "자연", dept: "인공지능학과", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "간호학과", count: "3", note: "" }
+            ]
+        },
+        {
+            name: "성균관대학교",
+            tags: ["학생부종합", "서류100"],
+            desc: "▶ **2026 총 모집인원이 25명이다.**\n- 서류 100%로 선발하며, 학교생활기록부 전체를 정성평가합니다.\n- 전공적합성과 학업역량이 매우 중요합니다.",
+            details: [
+                { gun: "종합", opt: "인문", dept: "인문과학계열", count: "최대 25", note: "" },
+                { gun: "종합", opt: "인문", dept: "사회과학계열", count: "최대 25", note: "" },
+                { gun: "종합", opt: "인문", dept: "경영학과", count: "최대 18", note: "" },
+                { gun: "종합", opt: "자연", dept: "자연과학계열", count: "최대 25", note: "" },
+                { gun: "종합", opt: "자연", dept: "전자전기공학부", count: "최대 17", note: "" },
+                { gun: "종합", opt: "자연", dept: "공학계열", count: "최대 25", note: "" },
+                { gun: "종합", opt: "자연", dept: "소프트웨어학과", count: "최대 8", note: "" }
+
+            ]
+        },
+        {    name: "한양대학교",
+            tags: ["학생부종합", "고른기회(특성화고 포함)"],
+            desc: "▶ 2026학년도 수시 전형\n- 학생부종합 전형으로 선발하며 수능 최저학력기준 및 면접 없음.\n- 고른기회 전형으로 다양한 배려 대상자(특성화고 포함)를 선발합니다.",
+            details: [
+                { gun: '학생부종합', opt: "자연", dept: "건축학부", count: "2", note: "5년제" },
+                { gun: '학생부종합', opt: "자연", dept: "건축공학부", count: "3", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "건설환경공학과", count: "4", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "도시공학과", count: "3", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "자원환경공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "융합전자공학부", count: "5", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "컴퓨터소프트웨어학부", count: "6", note: "" },
+                { gun: '학생부종합', opt: "상경", dept: "정보시스템학과(상경)", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "전기·생체공학부(전기공학전공)", count: "4", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "신소재공학부", count: "4", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "화학공학과", count: "4", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "에너지공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "기계공학부", count: "5", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "유기나노공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "원자력공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "산업공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "미래자동차공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "의예과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "간호학과", count: "3", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "국어국문학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "중어중문학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "영어영문학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "미디어커뮤니케이션학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "관광학부", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "수학과", count: "3", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "물리학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "생명과학과", count: "3", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "정책학과", count: "4", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "행정학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "상경", dept: "경제금융학부", count: "4", note: "" },
+                { gun: '학생부종합', opt: "상경", dept: "경영학부", count: "5", note: "" },
+                { gun: '학생부종합', opt: "상경", dept: "파이낸스경영학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "교육학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "교육공학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "국어교육과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문", dept: "영어교육과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "수학교육과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문/자연", dept: "의류학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "식품영양학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "인문/자연", dept: "실내건축디자인학과", count: "2", note: "" },
+                { gun: '학생부종합', opt: "자연", dept: "한양인터칼리지학부(자연)", count: "5", note: "" }
+            ]
+        },
+        {
+            name: "건국대학교",
+            tags: ["학생부종합"],
+            desc: "▶ **총 모집인원이 22명이다**\n- 학생부교과 30%, 서류 70%로 선발한다.",
+            details: [
+                { gun: "종합", opt: "인문", dept: "경제학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "국제무역학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "응용통계학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "정치외교학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "행정학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "경영학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "기술경영학과", count: "1", note: "" },
+                { gun: "종합", opt: "인문", dept: "부동산학과", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "건축학부", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "항공우주·모빌리티공학과", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "기계·로봇·자동차공학부", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "재료공학과", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "전기전자공학부", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "화공학부", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "생물공학과", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "컴퓨터공학부", count: "2", note: "" },
+                { gun: "종합", opt: "자연", dept: "동물자원·식품과학·유통학부", count: "2", note: "" },
+                { gun: "종합", opt: "자연", dept: "환경보건·산림조경학부", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "식량자원과학과", count: "1", note: "" },
+                { gun: "종합", opt: "자연", dept: "사회환경공학부", count: "1", note: "" },
+            ]
+        },
+        {
+            name: "명지대학교",
+            tags: ["학생부교과", "면접"],
+            desc: "▶ **교과 면접형**\n- 1단계 교과 100%, 2단계에서 면접을 실시하는 전형 구조를 가집니다.\n- 인문(서울) / 자연(용인) 캠퍼스로 이원화되어 있습니다.",
+            details: [
+                { gun: "교과", opt: "인문", dept: "공공인재학부-행정학전공", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "경상통계학부-경제학전공", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "경영학부-경영학전공", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "경영정보학과", count: "2", note: "" },
+                { gun: "교과", opt: "인문", dept: "디지털미디어학부", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "융합소프트웨어학부-응용소프트웨어전공", count: "1", note: "" },
+                { gun: "교과", opt: "자연", dept: "융합소프트웨어학부-데이터사이언스전공", count: "1", note: "" },
+                { gun: "교과", opt: "자연", dept: "융합소프트웨어학부-인공지능전공", count: "1", note: "" },
+                { gun: "교과", opt: "자연", dept: "디지털콘텐츠디자인학과", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "기계시스템공학부", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "스마트인프라공학부-건설환경공학전공", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "스마트인프라공학부-환경시스템공학전공", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "스마트인프라공학부-스마트모빌리티공학전공", count: "2", note: "" },
+                { gun: "교과", opt: "자연", dept: "전기전자공학부", count: "4", note: "" },
+                { gun: "교과", opt: "자연", dept: "컴퓨터정보통신공학부-컴퓨터공학전공", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "컴퓨터정보통신공학부-정보통신공학전공", count: "3", note: "" },
+                { gun: "교과", opt: "자연", dept: "산업경영공학과", count: "2", note: "" }
+            ]
+        },
+        {
+            name: "광운대학교",
+            tags: ["학생부종합", "서류100"],
+            desc: "▶ **학생부종합 형태로 운영되며, 서류 평가가 100%다.**\n- (평가항목: 학업역량35%, 진로역량45%, 안성20%)",
+            details: [
+                { gun: "종합", opt: "자연", dept: "전자공학과, 전자통신공학과, 전자융합공학과", count: "5", note: "3개의 과 합쳐서 총 5명 모집" },
+                { gun: "종합", opt: "자연", dept: "전기공학과, 전자재료공학과, 반도체시스템공학부", count: "5", note: "3개의 과 합쳐서 총 3명 모집" },
+                { gun: "종합", opt: "자연", dept: "컴퓨터정보공학부. 소프트웨어학부, 정보융합학부", count: "5", note: "3개의 과 합쳐서 총 5명 모집" },
+                { gun: "종합", opt: "자연", dept: "화학공학과", count: "3", note: "" },
+                { gun: "종합", opt: "인문", dept: "미디어커뮤니케이션학부", count: "2", note: "" },
+                { gun: "종합", opt: "인문", dept: "경영학부 경영학전공, 경영학부 빅데이터전공", count: "5", note: "2개의 과 합쳐서 총 3명 모집" },
+                { gun: "종합", opt: "인문", dept: "국제통상학부", count: "2", note: "" },
+                { gun: "종합", opt: "인문", dept: "동북아문화산업학부", count: "2", note: "" },
+            ]
+        },
+        {
+            name: "숙명여자대학교",
+            tags: ["학생부종합", "특성화고"],
+            desc: "2026학년도 숙명여자대학교 특성화고 출신자 전형 모집단위 및 모집인원",
+            details: [
+                { gun: "학생부종합", opt: "인문", dept: "문화관광학전공", count: "2", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "가족자원경영학과", count: "2" , note: ""},
+                { gun: "학생부종합", opt: "인문", dept: "아동복지학부", count: "2", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "홍보광고학과", count: "3", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "소비자경제학과", count: "2", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "미디어학부", count: "2", note: "" },
+                { gun: "학생부종합", opt: "자연", dept: "인공지능공학부", count: "2", note: "" },
+                { gun: "학생부종합", opt: "자연", dept: "컴퓨터과학전공", count: "3", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "의류학과", count: "2", note: "" },
+                { gun: "학생부종합", opt: "자연", dept: "식품영양학과", count: "2", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "경제학부", count: "2", note: "" },
+                { gun: "학생부종합", opt: "인문", dept: "경영학부", count: "2", note: "" }
+            ],
+        },
+        {    name: "삼육대학교",
+            tags: ["학생부교과", "특성화고"],
+            desc: "2026학년도 삼육대학교 특성화고 전형 모집단위 및 모집인원",
+            details: [
+                { gun: "학생부교과", opt: "인문", dept: "경영학과", count: "2", note: "" },
+                { gun: "학생부교과", opt: "자연", dept: "컴퓨터공학부", count: "2", note: "" },
+                { gun: "학생부교과", opt: "자연", dept: "인공지능융합학부", count: "3", note: "" },
+                { gun: "학생부교과", opt: "자연", dept: "건축학과", count: "2", note: "5년제" }
+            ]
+        },
+        {    name: "덕성여자대학교",
+            tags: ["학생부종합", "특성화고"],
+            desc: "2026학년도 덕성여자대학교 기회균형전형Ⅰ_특성화고교 전형 모집단위 및 모집인원",
+            details: [
+                { gun: "학생부종합", opt: "인문", dept: "글로벌융합대학", count: "3", note: "" },
+                { gun: "학생부종합", opt: "자연", dept: "과학기술대학", count: "6", note: "" },
+                { gun: "학생부종합", opt: "예술", dept: "Art&Design대학", count: "3", note: "" }
+            ]
+        }
+    ];
+
+    let currentTab = 'jeongsi'; 
+
+    const grid = document.getElementById('univ-grid');
+    const alertBanner = document.getElementById('alert-banner');
+
+    const modal = document.getElementById('modal');
+    const mTitle = document.getElementById('m-title');
+    const mTable = document.getElementById('m-table');
+    const mDesc = document.getElementById('m-desc');
+    const mTableHeader = document.getElementById('table-header');
+    const mWarning = document.getElementById('m-warning');
+
+    function switchTab(tab) {
+        currentTab = tab;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if(tab === 'jeongsi') document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        else document.querySelectorAll('.tab-btn')[1].classList.add('active');
+
+        if(tab === 'jeongsi') {
+            alertBanner.className = 'alert-banner';
+            alertBanner.innerHTML = `
+                <div style="font-size: 1.2rem;">📢</div>
+                <div>
+                    <strong>[필독] 정시 이월 인원 주의</strong><br>
+                    정시 모집 인원은 <strong>최초 계획상 '0명'</strong>인 경우가 많으며, 12월 말 <strong>'수시 미충원 이월'</strong>이 발생해야 확정됩니다.
+                </div>
+            `;
+        } else {
+            alertBanner.className = 'alert-banner alert-susi';
+            alertBanner.innerHTML = `
+                <div style="font-size: 1.2rem;">📝</div>
+                <div>
+                    <strong>[안내] 2026 수시 모집 분석</strong><br>
+                    수시 모집은 정시에 비해 <strong>선발 인원이 확정적</strong>입니다. 수도권 주요 대학은 <strong>학생부교과</strong> 및 <strong>학생부종합</strong> 전형으로 선발합니다.<br>
+                    (출처: 쎈(SEN)진학 2026 대입 수시 분석 자료)
+                </div>
+            `;
+        }
+
+        renderGrid();
+    }
+
+    function renderGrid() {
+        grid.innerHTML = '';
+        const data = currentTab === 'jeongsi' ? jeongsiUniversities : susiUniversities;
+
+        data.forEach((univ, idx) => {
+            const card = document.createElement('div');
+            card.className = 'univ-card';
+            card.onclick = () => openModal(idx);
+
+            const tagsHtml = univ.tags.map(t => {
+                let cls = 'tag';
+                if(t==='가군') cls='tag-ga';
+                else if(t==='나군') cls='tag-na';
+                else if(t==='다군') cls='tag-da';
+                else if(t.includes('교과')) cls='tag-kyoka';
+                else if(t.includes('종합')) cls='tag-jonghap';
+                else if(t.includes('신설')) cls='tag-new';
+                return `<span class="tag ${cls}">${t}</span>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div class="univ-header">
+                    <span class="univ-name">${univ.name}</span>
+                    </div>
+                <div class="tags">${tagsHtml}</div>
+                <div style="font-size:12px; color:#94a3b8; margin-top:12px; text-align:right; font-weight:500;">상세보기 &rarr;</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function openModal(idx) {
+        const data = currentTab === 'jeongsi' ? jeongsiUniversities : susiUniversities;
+        const u = data[idx];
+        
+        mTitle.innerText = u.name;
+        mDesc.innerHTML = markedText(u.desc); 
+        
+        if(currentTab === 'jeongsi') {
+            mTableHeader.innerHTML = `<th width="15%">군</th><th width="15%">계열</th><th>모집단위</th><th width="15%">인원</th><th width="20%">비고</th>`;
+            mWarning.innerText = "※ 위 정보는 정시 전형계획 기준이며, 수시 이월 인원 발표를 꼭 확인하세요.";
+        } else {
+            mTableHeader.innerHTML = `<th width="15%">전형</th><th width="15%">계열</th><th>모집단위</th><th width="15%">인원</th><th width="20%">비고</th>`;
+            mWarning.innerText = "※ 위 정보는 2026 수시 전형계획 기준입니다. 원서 접수 전 최종 요강을 확인하세요.";
+        }
+
+        mTable.innerHTML = u.details.map(d => {
+            const countClass = (d.count.includes('0') || d.count.includes('α') || d.count.includes('미정')) ? 'cb-zero' : 'cb-val';
+            
+            let optClass = 'opt-default';
+            if(d.opt.includes('사회') || d.opt.includes('경영')) optClass = 'opt-social';
+            else if(d.opt.includes('자연') || d.opt.includes('공학') || d.opt.includes('IT')) optClass = 'opt-nature';
+            else if(d.opt.includes('인문')) optClass = 'opt-human';
+            else if(d.opt.includes('예술') || d.opt.includes('예체능')) optClass = 'opt-art';
+
+            return `
+                <tr>
+                    <td><span style="font-weight:700; color:#555;">${d.gun}</span></td>
+                    <td><span class="opt-badge ${optClass}">${d.opt}</span></td>
+                    <td style="font-weight:600; color:#333;">${d.dept}</td>
+                    <td><span class="count-badge ${countClass}">${d.count}</span></td>
+                    <td style="font-size:13px; color:#666;">${d.note}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        modal.classList.add('open');
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+    }
+
+    function markedText(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+
+    window.onclick = (e) => {
+        if(e.target === modal) closeModal();
+    }
+
+    switchTab('jeongsi');
+
+</script>
+
+</body>
+</html>

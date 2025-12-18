@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniStrategist AI - 대학 모집 요강</title>
+
+<style>
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    background: #f5f7fa;
+    overflow-x: hidden;
+}
+
+a { text-decoration: none; color: inherit; }
+
+
+.navbar {
+    width: 100%;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6e6e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.icon-cap { width: 26px; height: 26px; }
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: 10px;
+}
+
+.nav-menu a {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #444;
+}
+
+.nav-menu a:hover { color: #6c47ff; }
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    transform: translateX(-50px);
+}
+
+.welcome-text {
+    display: inline-block;
+    transform: translateX(-50px);
+    font-weight: 600;
+}
+
+.logout-btn {
+   display: inline-block;
+   transform: translateX(-50px);
+}
+
+.btn-outline, .btn {
+    margin-left: 0;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #6c47ff;
+    color: #6c47ff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.btn {
+    background: #6c47ff;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+
+.page-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    margin-top: 40px;
+    margin-bottom: 25px;
+    color: #222;
+}
+
+
+.filter-container {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+
+.univ-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto 50px;
+}
+
+.univ-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+}
+
+.univ-card:hover {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+
+.modal {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.6); 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    width: 95%;
+    height: 95%;
+    overflow: hidden;
+    position: relative;
+}
+
+.pdf-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px 10px 0 10px;
+}
+
+.pdf-container {
+    flex: 1;
+    overflow: hidden;
+}
+
+.pdf-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #ff4c4c;
+    cursor: pointer;
+    z-index: 2100;
+}
+
+
+@media (max-width: 900px) {
+    .nav-left, .nav-right {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+    .nav-menu { flex-wrap: wrap; gap: 8px; margin-left: 0; margin-top: 8px; }
+}
+
+@media (max-width: 600px) {
+    .navbar { padding: 10px 15px; }
+    .nav-menu a { font-size: 13px; }
+    .btn, .btn-outline { font-size: 13px; padding: 5px 10px; margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <svg class="icon-cap" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L1 9l11 6 9-4.9V17h2V9L12 3z" fill="#6c47ff"/>
+            <path d="M11 21a4 4 0 008 0v-5l-8 4v1z" fill="#6c47ff" />
+        </svg>
+        <a href="/" class="logo-text">UniStrategist AI</a>
+        <div class="nav-menu">
+            <a href="/">홈</a>
+            <a href="/analysis">생기부 분석</a>
+            <a href="essay.html">모의 논술</a>
+            <a href="special.html">특성화고 특별 전형</a>
+            <a href="univ.html">대학 모집 요강</a>
+        </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+        <a href="/login.html" class="btn-outline">로그인</a>
+        <a href="/signup.html" class="btn">회원가입</a>
+    </div>
+</nav>
+
+<h1 class="page-title">대학 모집 요강</h1>
+
+<div class="filter-container">
+  <label><input type="checkbox" id="filterSeoul" checked> 인서울 대학 보기</label>
+  <label><input type="checkbox" id="filterSpecial" checked> 특수대학 보기</label>
+  <label><input type="checkbox" id="filterSudo" checked> 수도권 대학 보기</label>
+</div>
+
+<div class="univ-list" id="univList"></div>
+
+<div class="modal" id="selectModal">
+  <div class="modal-content">
+    <span class="modal-close" id="selectClose">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p>전형을 선택하세요:</p>
+    <div class="btn-group">
+      <button class="btn" id="btnSusi">수시 PDF 보기</button>
+      <button class="btn" id="btnJungsi">정시 PDF 보기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="pdfModal">
+  <div class="modal-content pdf-modal-content">
+    <span class="modal-close" id="pdfClose">&times;</span>
+    <h2 id="pdfTitle"></h2>
+    <div class="pdf-container" id="pdfContainer"></div>
+  </div>
+</div>
+
+<script>
+const universities = [
+    { name: "서울대학교", type: "인서울", susi: "https://drive.google.com/file/d/1CNtmjhLL4nDoLjS0uOuqYsrJSITxsG8b/preview", jungsi: "https://drive.google.com/file/d/1CA9z5CF7-J5uz_Wa2HKcrBVZTKJgxODW/preview" },
+    { name: "연세대학교", type: "인서울", susi: "https://drive.google.com/file/d/1hucXBDJijeNwO6c53_xy-MoC2V9tOLre/preview", jungsi: "https://drive.google.com/file/d/1aDOYBTgHL6RI6xAuiAysPY5n5SvDBxUY/preview" },
+    { name: "고려대학교", type: "인서울", susi: "https://drive.google.com/file/d/1m_YitavEN6xyoDmcH5ATwyF0zB_8D4PJ/preview", jungsi: "https://drive.google.com/file/d/1kJ7dCAilKozEfdxmCHMyQqK23u2-7ZS2/preview" },
+    { name: "서강대학교", type: "인서울", susi: "https://drive.google.com/file/d/1IKctjHoq15yHue069dpEphYXJqrLSr_Q/preview", jungsi: "https://drive.google.com/file/d/1HKqboT497Nz1r7NcHsZkac9Gl64CNfUo/preview" },
+    { name: "성균관대학교", type: "인서울", susi: "https://drive.google.com/file/d/17r_G4UOW_c3r5rdchKB9uyd2Xd4os_Zj/preview", jungsi: "https://drive.google.com/file/d/1IHyzbxo-xy5UhgctGH-mWxbLyoRuK-rM/preview" },
+    { name: "한양대학교", type: "인서울", susi: "https://drive.google.com/file/d/1VSnKOas4XCQN-LP6eI10ReoSfBk9CEiB/preview", jungsi: "https://drive.google.com/file/d/1mtpf5v5bHCIU9QiwxIaOi8qJTXc9K46P/preview" },
+    { name: "중앙대학교", type: "인서울", susi: "https://drive.google.com/file/d/11QUTYjKWWHXkzZVH_pzT9KLNCgUtVm0R/preview", jungsi: "https://drive.google.com/file/d/1ThBmMNH8URG0R1kXzcJ7BStN8ot56O9T/preview" },
+    { name: "경희대학교", type: "인서울", susi: "https://drive.google.com/file/d/1x4gYtMHu4DuYEVwZa2UEqBHXFpvUjQF6/preview", jungsi: "https://drive.google.com/file/d/1GEbmLcYzb4hiSVvnfBw3wC2N_UnP6TJJ/preview" },
+    { name: "한국외국어대학교", type: "인서울", susi: "https://drive.google.com/file/d/1VQxeIBm8IdniB-Pn0B_a5K1dmyiJtxtG/preview", jungsi: "https://drive.google.com/file/d/1vNyNiTKUeYXR20sOoA6I8vw4l8o8A5OL/preview" },
+    { name: "서울시립대학교", type: "인서울", susi: "https://drive.google.com/file/d/1bUJLf2XHiBIOb2wh5mzggCvZ8lQia1Dr/preview", jungsi: "https://drive.google.com/file/d/11LJvpKF4AJMJnJZ9tQDPt24iSudkORBa/preview" },
+    { name: "이화여자대학교", type: "인서울", susi: "https://drive.google.com/file/d/1_spcNTAfhRaImDHQ5YwoU_jcw4F6FFvh/preview", jungsi: "https://drive.google.com/file/d/1q04C_k0GgPqa3nS7X2pRocdJc6RuW44M/preview" },
+    { name: "건국대학교", type: "인서울", susi: "https://drive.google.com/file/d/1lFZfpj9CoTHX6RNhN4g5Bj2JmDakzmWI/preview", jungsi: "https://drive.google.com/file/d/1SdhMCn9f8oc62hKNOVNBlbmhcsNESAm4/preview" },
+    { name: "동국대학교", type: "인서울", susi: "https://drive.google.com/file/d/18WN2JJ10Li1fIs3QsDJjxRWFkBUpbLWn/preview", jungsi: "https://drive.google.com/file/d/1EmqcxWieCtnb9DQKafFwVaIpi-5rbbkO/preview" },
+    { name: "홍익대학교", type: "인서울", susi: "https://drive.google.com/file/d/1fjRiLTClbh2EXSNprib0ytRTlGa0dOWd/preview", jungsi: "https://drive.google.com/file/d/1eLD_Shdpwgvk5ycQj4DHWRhoYBcZ4lmC/preview" },
+    { name: "숙명여자대학교", type: "인서울", susi: "https://drive.google.com/file/d/1BBVvnAbBTz3NV82_AJp7kLqRnYg0akUA/preview", jungsi: "https://drive.google.com/file/d/1ke1fFxVPmhpNY0RqZusylMtaH9ojV0Da/preview" },
+    { name: "국민대학교", type: "인서울", susi: "https://drive.google.com/file/d/1f5It2i3rVEk09ZQu7TnquEsW2w3ndRTc/preview", jungsi: "https://drive.google.com/file/d/1tXxs-lVGh-9wc-RueRUCL8fY-DF0JdWE/preview" },
+    { name: "숭실대학교", type: "인서울", susi: "https://drive.google.com/file/d/1ZKsS-zbDkc8PmgAUQO1ozgmTkTLpqZyi/preview", jungsi: "https://drive.google.com/file/d/1Q5daafMyjr8WOXAFFvUtkecqlMntZ0F7/preview" },
+    { name: "세종대학교", type: "인서울", susi: "https://drive.google.com/file/d/1CpIXRWBLGfrFmrBZcXdYEjfZu2Oj6nle/preview", jungsi: "https://drive.google.com/file/d/1ds46xEQOZYfqeTM7R1w1-mu-RVyL4VpD/preview" },
+    { name: "단국대학교", type: "수도권", susi: "https://drive.google.com/file/d/19SPp8Zs9i3Adl1mEV3paJzB05uR3nfmJ/preview", jungsi: "https://drive.google.com/file/d/1L2MOt9nNCuPf7pI7khHmd2D7yJikhdc0/preview" },
+    { name: "KAIST", type: "특수대학", susi: "https://drive.google.com/file/d/1u4DvemUX-iqMKMIjAy2uHGVwaG5xwL8r/preview", jungsi: "https://drive.google.com/file/d/10ICBRpLrjTdxsBBXWjt6aqQJqbiXLOgC/preview" },
+    { name: "POSTECH", type: "특수대학", susi: "https://drive.google.com/file/d/1Vqn-kITH7VDkki_cdGoWLTDzKje1Lq2c/preview", jungsi: null },
+    { name: "서울교육대학교", type: "인서울", susi: "https://drive.google.com/file/d/1rWIlak0o3eWPy60XlOc7hGlaPJ00jC__/preview", jungsi: "https://drive.google.com/file/d/1DjxrkAnK9VC1LSCZwMRAg1DlYgstMQ2Z/preview" },
+    { name: "서울과학기술대학교", type: "인서울", susi: "https://drive.google.com/file/d/1kG16tlAaEZcdUEMdSIceyecAAwBqEYbX/preview", jungsi: "https://drive.google.com/file/d/1Kmz8tgPrg2BKAg1UwfIOEyz3_L3nnvz1/preview" },
+    { name: '육군사관학교', type: '특수대학', susi: 'https://drive.google.com/file/d/19W2Fpo1SBCkVDfDCRSI9HjWE3weUsN3Z/preview', jungsi: 'https://drive.google.com/file/d/1TC7c98iDKtTfCPbeMAzWOEU9Us9ulihq/preview'},
+    { name: '광운대학교', type: '인서울', susi: 'https://drive.google.com/file/d/1CssecwLhgpZ14X2zmJ9LRMqcpuBdUctG/preview', jungsi: 'https://drive.google.com/file/d/1sIn1VyUg7iPPV2DNSFjdEc8lN8vCj7DD/preview' },
+    { name: '명지대학교', type: '인서울', susi: 'https://drive.google.com/file/d/11C7L0UELFrtsA4G6icUL4Wn5bCwMGsoQ/preview', jungsi: 'https://drive.google.com/file/d/1szu3babCrypkXBbad32Y3PTinJw3XXGk/preview' },
+    { name: '상명대학교', type: '인서울', susi: 'https://drive.google.com/file/d/1k4WYO9RgfhNw6dft7tdZwe_MVAhPs--j/preview', jungsi: 'https://drive.google.com/file/d/14XtIzzsrrNGt2F4KegFi7yPsvIRV6EHa/preview' },
+    { name: '덕성여자대학교', type: '인서울', susi: 'https://drive.google.com/file/d/1qIp4MOZ7Vzr0EIi-nCIDdxwCPOaOXzfx/preview', jungsi: 'https://drive.google.com/file/d/1_cEmjK-qIUS3TXQ5y2123Inarm2GcBni/preview' },
+    { name: '동덕여자대학교', type: '인서울', susi: 'https://drive.google.com/file/d/1_NueMcZwLx-fVDLDr0ve9z9juZ2CDxWI/preview', jungsi: 'https://drive.google.com/file/d/1kqVaoz3DtYGD0xZuGvo_AEqyQE0RaQQs/preview' },
+    { name: "가천대학교", type: "수도권", susi: "https://drive.google.com/file/d/1ELpGFM94YMnKwwHwpTXeBesENdl68h8O/preview", jungsi: "https://drive.google.com/file/d/197n_ouxKbJR9ppxKpN2XxFBWUYiWBOZU/preview" },
+    { name: "인하대학교", type: "수도권", susi: "https://drive.google.com/file/d/1X1UEk_FwG99Bwsa81POos-aSX7M8AryW/preview", jungsi: "https://drive.google.com/file/d/17383ONTXmegZQ7sEb9pem1Jaz8et1Rhr/preview" },
+    { name: "인천대학교", type: "수도권", susi: "https://drive.google.com/file/d/130pK_8QD3xuZK-HtzdY1sbczAvl9d0Kq/preview", jungsi: "https://drive.google.com/file/d/1eDKY7_WYSpskDhghXYe4hl_hhI76hypl/preview" },
+    { name: "한성대학교", type: "인서울", susi: "https://drive.google.com/file/d/1gVbNkb7JAJP-0z9j0VKOt7Z_ehGo-992/preview", jungsi: "https://drive.google.com/file/d/15Q_oQguNHzpV-C_MtdsOqP0qf9MMjnGs/preview" }
+];
+
+const listEl = document.getElementById('univList');
+const filterSeoul = document.getElementById('filterSeoul');
+const filterSpecial = document.getElementById('filterSpecial');
+const filterSudo = document.getElementById('filterSudo');
+
+const selectModal = document.getElementById('selectModal');
+const selectClose = document.getElementById('selectClose');
+const modalTitle = document.getElementById('modalTitle');
+const btnSusi = document.getElementById('btnSusi');
+const btnJungsi = document.getElementById('btnJungsi');
+
+const pdfModal = document.getElementById('pdfModal');
+const pdfClose = document.getElementById('pdfClose');
+const pdfTitle = document.getElementById('pdfTitle');
+const pdfContainer = document.getElementById('pdfContainer');
+
+let selectedUniv = null;
+
+function renderList() {
+    listEl.innerHTML = '';
+    universities.forEach(univ => {
+      if (
+        (univ.type == "인서울" && filterSeoul.checked) ||
+        (univ.type == "특수대학" && filterSpecial.checked) ||
+        (univ.type == "수도권" && filterSudo.checked)
+      ) {
+        const card = document.createElement('div');
+        card.className = 'univ-card';
+        card.innerText = univ.name;
+        card.addEventListener('click', () => openSelectModal(univ));
+        listEl.appendChild(card);
+      }
+    });
+}
+
+function openSelectModal(univ) {
+    selectedUniv = univ;
+    modalTitle.innerText = univ.name;
+    selectModal.style.display = 'flex';
+
+    if (!univ.jungsi) {
+        btnJungsi.style.display = "none";
+    } else {
+        btnJungsi.style.display = "inline-block";
+    }
+}
+
+
+function openPDFModal(pdfPath, title) {
+    pdfContainer.innerHTML = `<iframe src="${pdfPath}"></iframe>`;
+    pdfTitle.innerText = title;
+    pdfModal.style.display = 'flex';
+}
+
+btnSusi.addEventListener('click', () => {
+    if(selectedUniv) openPDFModal(selectedUniv.susi, selectedUniv.name + " - 수시");
+    selectModal.style.display = 'none';
+});
+
+btnJungsi.addEventListener('click', () => {
+    if(selectedUniv) openPDFModal(selectedUniv.jungsi, selectedUniv.name + " - 정시");
+    selectModal.style.display = 'none';
+});
+
+selectClose.addEventListener('click', () => selectModal.style.display = 'none');
+pdfClose.addEventListener('click', () => pdfModal.style.display = 'none');
+pdfModal.addEventListener('click', (e) => {
+    if (e.target === pdfModal) pdfModal.style.display = 'none';
+});
+
+filterSeoul.addEventListener('change', renderList);
+filterSpecial.addEventListener('change', renderList);
+filterSudo.addEventListener('change', renderList);
+
+renderList();
+
+fetch('/api/session')
+.then(res => res.json())
+.then(data => {
+    if(data.loggedIn){
+        const navRight = document.getElementById('nav-right');
+        navRight.innerHTML = `
+            <span class="welcome-text">환영합니다, ${data.name}님</span>
+            <a href="/logout" class="btn-outline logout-btn">로그아웃</a>
+        `;
+    }
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

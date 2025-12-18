@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniStrategist AI - 모의 논술</title>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+    window.MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+        svg: { fontCache: 'global' }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+html, body { margin: 0; padding: 0; font-family: 'Inter', 'Pretendard', sans-serif; background: #f5f7fa; color: #333; overflow-x: hidden; }
+* { box-sizing: border-box; } a { text-decoration: none; color: inherit; }
+
+.navbar { width: 100%; padding: 12px 20px; background: #fff; border-bottom: 1px solid #e6e6e6; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+.nav-left { display: flex; align-items: center; gap: 10px; }
+.logo-text { font-size: 20px; font-weight: 700; color: #000; }
+.nav-menu { display: flex; gap: 10px; margin-left: 10px; }
+.nav-menu a { font-size: 14px; font-weight: 500; color: #444; transition: color 0.2s; }
+.nav-menu a.active { color: #6c47ff; font-weight: 700; }
+.nav-right { display: flex; gap: 8px; }
+
+.btn-outline { background: transparent; border: 1px solid #6c47ff; color: #6c47ff; padding: 6px 14px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.btn-outline:hover { background: #f0edff; }
+.btn { background: #6c47ff; color: white; padding: 6px 14px; border-radius: 8px; font-size: 14px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { background: #5a37e6; }
+.btn:disabled { background: #a0a0a0; cursor: not-allowed; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; }
+.page-title { text-align: center; font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #222; }
+.page-subtitle { text-align: center; color: #666; margin-bottom: 40px; font-size: 16px; }
+.grid-container { display: grid; grid-template-columns: 320px 1fr; gap: 32px; } 
+
+.analysis-card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f0f0f0; margin-bottom: 24px; }
+.card-padding { padding: 24px; }
+.card-header { padding: 12px 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; }
+
+.upload-area { border: 2px dashed #e0e0e0; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; background: white; margin-bottom: 24px; }
+.upload-area:hover { border-color: #6c47ff; background: #f8f7ff; }
+.upload-area.has-file { border-color: #6c47ff; background: #f0edff; }
+.hidden { display: none !important; }
+
+.input-group { margin-bottom: 16px; }
+.input-label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.input-text { width: 100%; padding: 10px 16px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; background: #fff; }
+
+.tab-container { display: flex; border-bottom: 1px solid #e0e0e0; }
+.tab-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 600; color: #666; background: #f9fafb; border: none; cursor: pointer; }
+.tab-btn.active { background: #fff; color: #6c47ff; border-bottom: 2px solid #6c47ff; }
+
+.history-item { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; }
+.history-item:hover { background: #f9fafb; }
+.history-item:last-child { border-bottom: none; }
+.history-univ { font-weight: 700; font-size: 14px; color: #333; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
+.history-date { font-size: 12px; color: #888; display:flex; justify-content:space-between; }
+.badge-solved { background: #ecfdf5; color: #047857; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.badge-unsolved { background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.badge-shared { background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-window { background: white; width: 95%; max-width: 1000px; height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; transform: translateY(20px); transition: transform 0.3s ease; }
+.modal-overlay.active .modal-window { transform: translateY(0); }
+.modal-header { padding: 16px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+.modal-body { flex: 1; overflow-y: auto; padding: 30px; background: #f9fafb; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #e5e7eb; background: #fff; text-align: right; }
+
+.problem-box { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 12px; line-height: 1.8; }
+.answer-area { width: 100%; height: 200px; padding: 16px; border: 1px solid #d1d5db; border-radius: 8px; resize: vertical; margin-bottom: 30px; font-family: inherit; }
+
+@media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } .nav-menu { display: none; } }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <svg style="width:26px; height:26px;" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L1 9l11 6 9-4.9V17h2V9L12 3z" fill="#6c47ff"/>
+            <path d="M11 21a4 4 0 008 0v-5l-8 4v1z" fill="#6c47ff" />
+        </svg>
+        <a href="/" class="logo-text" style="margin-left:8px;">UniStrategist AI</a>
+        <div class="nav-menu">
+            <a href="/">홈</a>
+            <a href="/analysis">생기부 분석</a>
+            <a href="/essay.html" class="active">모의 논술</a>
+            <a href="/special.html">특성화고 특별 전형</a>
+            <a href="univ.html">대학 모집 요강</a>
+        </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+        <a href="/login.html" class="btn-outline">로그인</a>
+        <a href="/signup.html" class="btn">회원가입</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">AI 기출 변형 & 모의 논술</h1>
+    <p class="page-subtitle">대학별 맞춤 변형 문제 생성 및 부정행위 방지 시스템이 적용된 실전 모의고사입니다.</p>
+
+    <div class="grid-container">
+        <div>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept=".pdf" hidden>
+                <div id="emptyState">
+                    <i data-lucide="file-up" style="width:48px; height:48px; color:#d1d5db; margin-bottom:12px;"></i>
+                    <p style="font-weight:600; color:#374151;">PDF 기출문제 업로드</p>
+                </div>
+                <div id="fileState" class="hidden">
+                    <div style="background:#f0edff; color:#6c47ff; width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px;">
+                        <i data-lucide="file-check" style="width:20px;"></i>
+                    </div>
+                    <p id="fileName" style="font-size:14px; font-weight:600; color:#333; margin:0;"></p>
+                    <button id="removeFileBtn" style="background:none; border:none; color:#ef4444; text-decoration:underline; cursor:pointer; margin-top:8px; font-size:12px;">파일 삭제</button>
+                </div>
+            </div>
+
+            <div class="analysis-card card-padding">
+                <h3 style="font-size:14px; font-weight:700; color:#374151; margin-bottom:16px;">
+                    <i data-lucide="sliders" style="width:16px; height:16px; color:#6c47ff;"></i> 생성 옵션
+                </h3>
+                
+                <div class="input-group">
+                    <label class="input-label">시험지 제목 (선택)</label>
+                    <input type="text" id="examTitle" class="input-text" placeholder="예: 2025 연세대 파이널 1회">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">목표 대학교</label>
+                    <select id="targetUniv" class="input-text">
+                        <option value="서웋대학교">서울대학교</option>
+                        <option value="연세대학교">연세대학교</option>
+                        <option value="고려대학교">고려대학교</option>
+                        <option value="서강대학교">서강대학교</option>
+                        <option value="성균관대학교">성균관대학교</option>
+                        <option value="한양대학교">한양대학교</option>
+                        <option value="중앙대학교">중앙대학교</option>
+                        <option value="경희대학교">경희대학교</option>
+                        <option value="한국외국어대학교">한국외국어대학교</option>
+                        <option value="서울시립대학교">서울시립대학교</option>
+                        <option value="이화여자대학교">이화여자대학교</option>
+                        <option value="건국대학교">건국대학교</option>
+                        <option value="동국대학교">동국대학교</option>
+                        <option value="홍익대학교">홍익대학교</option>
+                        <option value="숙명여자대학교">숙명여자대학교</option>
+                        <option value="국민대학교">국민대학교</option>
+                        <option value="숭실대학교">숭실대학교</option>
+                        <option value="세종대학교">세종대학교</option>
+                        <option value="단국대학교">단국대학교</option>
+                        <option value="KAIST">KAIST</option>
+                        <option value="POSTECH">POSTECH</option>
+                        <option value="서울교육대학교">서울교육대학교</option>
+                        <option value="서울과학기술대학교">서울과학기술대학교</option>
+                        <option value="육군사관학교">육군사관학교</option>
+                        <option value="광운대학교">광운대학교</option>
+                        <option value="명지대학교">명지대학교</option>
+                        <option value="상명대학교">상명대학교</option>
+                        <option value="덕성여자대학교">덕성여자대학교</option>
+                        <option value="동덕여자대학교">동덕여자대학교</option>
+                        <option value="가천대학교">가천대학교</option>
+                        <option value="인하대학교">인하대학교</option>
+                        <option value="인천대학교">인천대학교</option>
+                        <option value="한성대학교">한성대학교</option>
+                    </select>
+                </div>
+                <button id="generateBtn" class="btn" style="width:100%; padding:14px;" disabled>
+                    <i data-lucide="sparkles" style="width:18px;"></i> 변형 문제 생성하기
+                </button>
+                <div id="statusBox" class="status-box hidden">
+                    <div id="statusIcon"><i data-lucide="loader-2" class="spin" style="color:#6c47ff;"></i></div>
+                    <span id="statusMessage" style="font-size:14px; font-weight:500;">처리 중...</span>
+                </div>
+            </div>
+
+            <div class="analysis-card" style="padding:0;">
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchHistoryTab('my')">나의 기록</button>
+                    <button class="tab-btn" onclick="switchHistoryTab('public')">공유 문제 은행</button>
+                </div>
+                <div class="card-header" style="border-top:none;">
+                    <span id="listTitle" style="font-size:13px; font-weight:700; color:#333;">
+                        <i data-lucide="history" style="width:13px;"></i> 내가 생성한 문제
+                    </span>
+                    <button onclick="refreshCurrentTab()" style="background:none; border:none; cursor:pointer;" title="새로고침">
+                        <i data-lucide="refresh-cw" style="width:13px;"></i>
+                    </button>
+                </div>
+                <div id="historyList" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <div id="rightPanel">
+            <div id="viewIntro" class="analysis-card" style="height:600px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                <div style="background:#f8f7ff; padding:20px; border-radius:50%; margin-bottom:24px;">
+                    <i data-lucide="pen-tool" style="width:48px; height:48px; color:#6c47ff;"></i>
+                </div>
+                <h2 style="font-size:20px; margin-bottom:12px;">실전 모의고사</h2>
+                <p style="color:#6b7280;">
+                    문제를 생성하거나 좌측 목록에서 선택하세요.<br>
+                    <span style="color:#ef4444; font-weight:600;">※ 시험 중 화면 이탈 시 0점 처리됩니다.</span>
+                </p>
+            </div>
+
+            <div id="viewResult" class="hidden">
+                <div class="analysis-card card-padding">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                        <h2 style="font-size:22px; font-weight:700;">채점 결과</h2>
+                        <button class="btn-outline" onclick="location.reload()">처음으로</button>
+                    </div>
+                    <div id="resultContent" style="background:#f9fafb; padding:24px; border-radius:12px; line-height:1.7; font-size:15px; white-space:pre-wrap;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="solveModal" class="modal-overlay">
+    <div class="modal-window">
+        <div class="modal-header">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span id="modalTitle" class="modal-title">실전 모의고사</span>
+                <div style="background:#f3f4f6; padding:4px 10px; border-radius:6px; display:flex; align-items:center; gap:6px; font-weight:600; font-size:14px;">
+                    <i data-lucide="timer" style="width:16px;"></i> <span id="timer">01:40:00</span>
+                </div>
+                <div style="color:#ef4444; font-size:12px; font-weight:600; background:#fef2f2; padding:2px 8px; border-radius:4px;">
+                    ⚠️ 화면 이탈 금지
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeSolveModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="questionsContainer" style="max-width:800px; margin:0 auto;"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="submitBtn" class="btn" style="padding:12px 24px; font-size:16px;">
+                답안 제출 <i data-lucide="check-circle" style="width:18px;"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    const examDataCache = {}; 
+    
+    let currentFile = null;
+    let generatedQuestions = [];
+    let currentHistoryId = null;
+    let currentMetaInfo = null;
+    let currentTab = 'my';
+    
+    let timerInterval;
+    let antiCheatTimeout; 
+    let remainingTime = 100 * 60;
+    let isExamActive = false;
+
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const generateBtn = document.getElementById('generateBtn');
+    const statusBox = document.getElementById('statusBox');
+    const solveModal = document.getElementById('solveModal');
+
+    fetch('/api/session').then(res => res.json()).then(data => {
+        if(data.loggedIn){
+            document.getElementById('nav-right').innerHTML = `
+                <span style="font-weight:600; margin-right:10px; color:#333;">환영합니다, ${data.name}님</span>
+                <a href="/logout" class="btn-outline">로그아웃</a>`;
+            loadHistory();
+        }
+    }).catch(()=>{});
+
+    function switchHistoryTab(tab) {
+        currentTab = tab;
+        const btns = document.querySelectorAll('.tab-btn');
+        const title = document.getElementById('listTitle');
+        btns[0].classList.toggle('active', tab==='my');
+        btns[1].classList.toggle('active', tab==='public');
+        
+        if(tab==='my') {
+            title.innerHTML = `<i data-lucide="history" style="width:13px;"></i> 내가 생성한 문제`;
+            loadHistory();
+        } else {
+            title.innerHTML = `<i data-lucide="globe" style="width:13px;"></i> 공유 문제 은행`;
+            loadPublicExams();
+        }
+    }
+    window.refreshCurrentTab = () => currentTab === 'my' ? loadHistory() : loadPublicExams();
+
+    function processExamData(items) {
+        const sortedAsc = items.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        const counters = {};
+        sortedAsc.forEach(item => {
+            const key = item.target_univ;
+            if(!counters[key]) counters[key] = 0;
+            counters[key]++;
+            item.vol = counters[key];
+        });
+        return sortedAsc.reverse();
+    }
+
+    async function loadHistory() {
+        const list = document.getElementById('historyList');
+        try {
+            const res = await fetch('/api/essay-history');
+            const data = await res.json();
+            
+            if(!data.success || !data.history.length) {
+                list.innerHTML = `<div style="padding:30px; text-align:center; color:#999; font-size:13px;">기록이 없습니다.</div>`;
+                return;
+            }
+
+            const processed = processExamData(data.history);
+            
+            list.innerHTML = processed.map(item => {
+                const cacheId = `my_${item.id}`;
+                examDataCache[cacheId] = item;
+                
+                const date = new Date(item.created_at).toLocaleDateString();
+                const isSolved = !!item.grading_result;
+                const badge = isSolved ? `<span class="badge-solved">채점완료</span>` : `<span class="badge-unsolved">미응시</span>`;
+                const displayTitle = item.title || `${item.target_univ} (${item.vol}회)`;
+
+                return `
+                <div class="history-item" onclick="handleHistoryClick('${cacheId}')">
+                    <div class="history-univ">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${displayTitle}</span> 
+                        ${badge}
+                    </div>
+                    <div class="history-date">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${item.file_name}</span>
+                        <span>${date}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadPublicExams() {
+        const list = document.getElementById('historyList');
+        try {
+            const res = await fetch('/api/public-exams');
+            const data = await res.json();
+            if(!data.exams.length) {
+                list.innerHTML = `<div style="padding:30px; text-align:center; color:#999;">공유된 문제가 없습니다.</div>`;
+                return;
+            }
+
+            const processed = processExamData(data.exams);
+
+            list.innerHTML = processed.map(item => {
+                const cacheId = `pub_${item.id}`;
+                examDataCache[cacheId] = item;
+                const date = new Date(item.created_at).toLocaleDateString();
+                const displayTitle = item.title || `${item.target_univ} (${item.vol}회)`;
+
+                return `
+                <div class="history-item" onclick="handlePublicClick('${cacheId}')">
+                    <div class="history-univ">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${displayTitle}</span> 
+                        <span class="badge-shared">공유됨</span>
+                    </div>
+                    <div class="history-date"><span>${item.file_name}</span><span>${date}</span></div>
+                </div>`;
+            }).join('');
+        } catch(e) {}
+    }
+
+    window.handleHistoryClick = function(cacheId) {
+        const item = examDataCache[cacheId];
+        if(!item) return;
+
+        const questions = JSON.parse(item.questions_json);
+        currentHistoryId = item.id; 
+        currentMetaInfo = null;
+        
+        const title = item.title || `${item.target_univ} (${item.vol}회)`;
+
+        if (item.grading_result) {
+            if(confirm(`[${title}] 이미 채점된 시험지입니다.\n확인: 다시 풀기 (재응시)\n취소: 채점 결과 보기`)) {
+                startExam(questions, `${title} (재응시)`);
+            } else {
+                showResult(item.grading_result);
+            }
+        } else {
+            if(confirm(`[${title}] 문제를 지금 푸시겠습니까?`)) startExam(questions, title);
+        }
+    };
+
+    window.handlePublicClick = function(cacheId) {
+        const item = examDataCache[cacheId];
+        if(!item) return;
+        const title = item.title || `${item.target_univ} (${item.vol}회)`;
+        if(!confirm(`[${title}] 공유 문제를 풀어보시겠습니까?\n(제출 시 '나의 기록'에 저장됩니다.)`)) return;
+        
+        const questions = JSON.parse(item.questions_json);
+        currentHistoryId = null; 
+        currentMetaInfo = { targetUniv: item.target_univ, fileName: item.file_name, title: title };
+        
+        startExam(questions, `${title} (공유)`);
+    };
+
+    function showResult(html) {
+        document.getElementById('viewIntro').classList.add('hidden');
+        document.getElementById('viewResult').classList.remove('hidden');
+        document.getElementById('resultContent').innerHTML = html;
+        if(window.MathJax) MathJax.typesetPromise();
+    }
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        currentFile = file;
+        document.getElementById('fileName').innerText = file.name;
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('fileState').classList.remove('hidden');
+        uploadArea.classList.add('has-file');
+        generateBtn.disabled = false;
+    });
+
+    document.getElementById('removeFileBtn').addEventListener('click', (e)=>{
+        e.stopPropagation(); fileInput.value=''; currentFile=null;
+        document.getElementById('emptyState').classList.remove('hidden');
+        document.getElementById('fileState').classList.add('hidden');
+        uploadArea.classList.remove('has-file');
+        generateBtn.disabled = true;
+    });
+
+    const convertToBase64 = (f) => new Promise((res, rej) => {
+        const r = new FileReader(); r.readAsDataURL(f);
+        r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej;
+    });
+
+    generateBtn.addEventListener('click', async () => {
+        if(!currentFile) return;
+        const targetUniv = document.getElementById('targetUniv').value;
+        const userTitle = document.getElementById('examTitle').value;
+
+        try {
+            generateBtn.disabled = true;
+            statusBox.classList.remove('hidden');
+            const base64 = await convertToBase64(currentFile);
+            
+            const res = await fetch('/api/generate-essay-auto', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ 
+                    pdfBase64:base64, 
+                    fileName:currentFile.name, 
+                    targetUniv, 
+                    title: userTitle 
+                })
+            });
+            const data = await res.json();
+            if(!data.success) throw new Error(data.error);
+
+            statusBox.classList.add('hidden');
+            currentHistoryId = data.historyId;
+            currentMetaInfo = null;
+            loadHistory();
+            
+            const finalTitle = userTitle || `${targetUniv} 실전 모의고사`;
+            startExam(data.questions, finalTitle);
+
+        } catch(e) { 
+            alert(e.message); statusBox.classList.add('hidden'); generateBtn.disabled=false; 
+        }
+    });
+
+    function startExam(questions, title) {
+        cleanupExam();
+
+        generatedQuestions = questions;
+        document.getElementById('modalTitle').innerText = title;
+        
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+        questions.forEach((q, idx) => {
+            container.innerHTML += `
+                <div style="margin-bottom:30px;">
+                    <div class="problem-box"><strong>[문제 ${idx+1}]</strong><br><br>${q.replace(/\n/g,'<br>')}</div>
+                    <textarea class="answer-area" id="answer_${idx}" placeholder="답안 입력"></textarea>
+                </div>`;
+        });
+        if(window.MathJax) MathJax.typesetPromise();
+
+        solveModal.classList.add('active');
+        remainingTime = 100 * 60;
+        isExamActive = true;
+        startTimer();
+
+        antiCheatTimeout = setTimeout(() => {
+            if(isExamActive) {
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+                window.addEventListener('blur', handleWindowBlur);
+                console.log("부정행위 감지 시작됨");
+            }
+        }, 3000); 
+    }
+
+    function handleVisibilityChange() {
+        if(isExamActive && document.hidden) {
+            triggerCheatingPenalty("탭 전환(화면 가림)");
+        }
+    }
+
+    function handleWindowBlur() {
+        if(isExamActive) {
+            triggerCheatingPenalty("창 이탈(외부 클릭)");
+        }
+    }
+
+    function triggerCheatingPenalty(reason) {
+        if (!isExamActive) return;
+
+        isExamActive = false; 
+        alert(`🚨 부정행위 감지!\n사유: ${reason}\n\n규정에 따라 0점으로 처리되며 즉시 제출됩니다.`);
+        submitExam(true); 
+    }
+
+    function closeSolveModal() {
+        if(isExamActive) {
+            if(!confirm("시험을 중단하시겠습니까?\n작성 중인 내용은 저장되지 않습니다.")) return;
+        }
+        cleanupExam();
+        solveModal.classList.remove('active');
+    }
+
+    function cleanupExam() {
+        isExamActive = false;
+        clearInterval(timerInterval);
+        clearTimeout(antiCheatTimeout);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('blur', handleWindowBlur);
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            remainingTime--;
+            if(remainingTime <= 0) {
+                alert("시간 종료. 자동 제출합니다.");
+                submitExam(false);
+            }
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const h = String(Math.floor(remainingTime / 3600)).padStart(2, '0');
+        const m = String(Math.floor((remainingTime % 3600) / 60)).padStart(2, '0');
+        const s = String(remainingTime % 60).padStart(2, '0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', () => {
+        if(confirm("답안을 제출하시겠습니까?")) submitExam(false);
+    });
+
+    async function submitExam(isCheating) {
+        cleanupExam();
+        
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; 
+        btn.innerText = isCheating ? "부정행위 처리 중..." : "채점 중...";
+
+        const answers = generatedQuestions.map((q, i) => ({
+            question: q,
+            answer: document.getElementById(`answer_${i}`) ? document.getElementById(`answer_${i}`).value : ""
+        }));
+
+        try {
+            const res = await fetch('/api/grade-essay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    qaPairs: answers, 
+                    historyId: currentHistoryId, 
+                    metaInfo: currentMetaInfo,
+                    isCheating: isCheating 
+                })
+            });
+            const data = await res.json();
+            if(!data.success) throw new Error(data.error);
+
+            solveModal.classList.remove('active');
+            btn.disabled = false;
+            btn.innerHTML = `답안 제출 <i data-lucide="check-circle"></i>`;
+            
+            showResult(data.result);
+            if(currentTab === 'my') loadHistory();
+            else switchHistoryTab('my');
+
+        } catch(e) {
+            alert("제출 오류: " + e.message);
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

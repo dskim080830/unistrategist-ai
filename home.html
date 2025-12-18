@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniStrategist AI</title>
+
+<style>
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    background: #f5f7fa;
+    overflow-x: hidden;
+}
+
+a { text-decoration: none; color: inherit; }
+
+
+.navbar {
+    width: 100%;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6e6e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.icon-cap { width: 26px; height: 26px; }
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: 10px;
+    min-width: 0;
+}
+
+.nav-menu a {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #444;
+    cursor: pointer; 
+}
+
+.nav-menu a:hover { color: #6c47ff; }
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #6c47ff;
+    color: #6c47ff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn {
+    background: #6c47ff;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+
+.hero {
+    text-align: center;
+    margin-top: 60px;
+    margin-bottom: 50px;
+    padding: 0 5%;
+}
+
+.hero-title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: #222;
+}
+
+.hero-sub {
+    font-size: 16px;
+    color: #555;
+}
+
+
+.features {
+    max-width: 1200px;
+    margin: 70px auto 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+    text-align: center;
+    padding: 0 5%;
+}
+
+.feature-box {
+    background: white;
+    padding: 30px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 16px;
+}
+
+.feature-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.feature-desc {
+    font-size: 14px;
+    color: #666;
+}
+
+
+@media (max-width: 900px) {
+    .nav-left, .nav-right {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+    .nav-menu { flex-wrap: wrap; gap: 8px; margin-left: 0; margin-top: 8px; }
+    .hero-title { font-size: 32px; }
+    .hero-sub { font-size: 15px; }
+}
+
+@media (max-width: 600px) {
+    .navbar { padding: 10px 15px; }
+    .nav-menu a { font-size: 13px; }
+    .btn, .btn-outline { font-size: 13px; padding: 5px 10px; }
+    .hero-title { font-size: 28px; }
+    .hero-sub { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <svg class="icon-cap" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L1 9l11 6 9-4.9V17h2V9L12 3z" fill="#6c47ff"/>
+            <path d="M11 21a4 4 0 008 0v-5l-8 4v1z" fill="#6c47ff" />
+        </svg>
+        <a href="/" class="logo-text">UniStrategist AI</a>
+        <div class="nav-menu">
+            <a href="/">홈</a>
+            <a href="/analysis">생기부 분석</a>
+            <a href="/essay.html" class="active">모의 논술</a>
+            <a href="/special.html">특성화고 특별 전형</a>
+            <a href="univ.html">대학 모집 요강</a>
+        </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+        <a href="/login.html" class="btn-outline">로그인</a>
+        <a href="/signup.html" class="btn">회원가입</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-title">AI와 함께 당신의 입시 전략을 세워보세요</div>
+    <div class="hero-sub">UniStrategist AI는 당신의 성적, 목표 대학 및 전공을 분석하여 맞춤형 합격 전략을 제공합니다.</div>
+</section>
+
+<section class="features">
+    <div class="feature-box auth-required" data-href="/analysis">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="#6c47ff">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+        <div class="feature-title">정확한 AI 분석</div>
+        <div class="feature-desc">생기부 기반 상세 분석 제공</div>
+    </div>
+
+    <div class="feature-box auth-required" data-href="essay.html">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="#6c47ff">
+            <path d="M6 2h9l5 5v15a1 1 0 01-1 1H6a1 1 0 01-1-1V3a1 1 0 011-1z"/>
+        </svg>
+        <div class="feature-title">모의 논술 생성</div>
+        <div class="feature-desc">PDF 기반 AI 논술 생성 및 채점</div>
+    </div>
+
+    <div class="feature-box">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="#6c47ff">
+            <path d="M9 16.17l-3.88-3.88L4 13.41 9 18.41l12-12-1.41-1.42z"/>
+        </svg>
+        <div class="feature-title">합격 전략 추천</div>
+        <div class="feature-desc">목표 대학 합격률 기반 전략 추천</div>
+    </div>
+</section>
+
+<script>
+
+let isUserLoggedIn = false;
+
+
+fetch('/api/session')
+.then(res => res.json())
+.then(data => {
+    isUserLoggedIn = data.loggedIn; 
+
+    if(data.loggedIn){
+        const navRight = document.getElementById('nav-right');
+        navRight.innerHTML = `
+            <span style="font-weight:600; margin-right:10px;">환영합니다, ${data.name}님</span>
+            <a href="/logout" class="btn-outline">로그아웃</a>
+        `;
+    }
+})
+.catch(err => console.error("Session check failed", err));
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const restrictedElements = document.querySelectorAll('.auth-required');
+
+    restrictedElements.forEach(el => {
+        el.addEventListener('click', (e) => {
+           
+            if (!isUserLoggedIn) {
+                e.preventDefault(); 
+                alert("로그인 후 이용해주세요.");
+                location.href = "/login.html"; 
+            } 
+           
+            else if (el.tagName === 'DIV' && el.dataset.href) {
+                location.href = el.dataset.href;
+            }
+            
+        });
+    });
+});
+</script>
+
+</body>
+</html>
