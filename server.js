@@ -208,103 +208,176 @@ function getGoogleDriveDownloadUrl(previewUrl) {
     return `https://drive.google.com/uc?export=download&id=${id}`;
 }
 
-// ---------------- AI 분석 API (수정됨) ----------------
-app.post('/api/history', async (req, res) => {
-  req.setTimeout(300000); // 5분 타임아웃
+// [수정됨] 생기부 분석 요청 처리 (변수명 불일치 및 DB 오류 방지)
+app.post('/api/analyze', async (req, res) => {
+    // 5분 타임아웃 설정 (AI 분석이 오래 걸릴 수 있음)
+    req.setTimeout(300000); 
 
-  try {
-    const { text, analysisType, targetUniv, targetMajor, targetType } = req.body;
-    
-    if (!text) return res.status(400).json({ error: '분석할 텍스트가 없습니다.' });
+    try {
+        console.log("--- 분석 요청 도착 ---");
+        
+        // [핵심 수정] 프론트엔드가 'text'로 보내든 'extracted_text'로 보내든 다 받도록 처리
+        const text = req.body.text || req.body.extracted_text;
+        const { targetUniv, targetMajor, targetType } = req.body;
+        
+        // 로그인 확인 (세션이 없으면 null)
+        const userId = req.session.user ? req.session.user.id : null;
 
-    // 1. 모집요강 PDF 읽기
-    let admissionGuideText = "해당 대학의 구체적인 모집요강 파일이 서버에 없습니다. 일반적인 입시 기준으로 분석합니다.";
-    
-    if (targetUniv && UNIV_FILE_MAP[targetUniv]) {
-        const pdfUrl = UNIV_FILE_MAP[targetUniv];
-        const downloadUrl = getGoogleDriveDownloadUrl(pdfUrl);
-
-        try {
-            console.log(`Downloading PDF for ${targetUniv}: ${downloadUrl}`);
-            const response = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
-            const dataBuffer = Buffer.from(response.data);
-            const pdfData = await pdfParse(dataBuffer);
-            
-            if (targetType) {
-                admissionGuideText = extractRelevantPart(pdfData.text, targetType);
-            } else {
-                admissionGuideText = pdfData.text.slice(0, 15000);
-            }
-            
-        } catch (pdfErr) {
-            console.error("PDF download/parsing error:", pdfErr);
-            admissionGuideText = "PDF 다운로드 또는 파싱 중 오류가 발생했습니다. 일반적인 입시 기준으로 분석합니다.";
+        // 1. 필수 데이터 확인
+        if (!text) {
+            console.error("오류: 생기부 텍스트가 전달되지 않았습니다.");
+            return res.status(400).json({ error: '분석할 텍스트가 없습니다.' });
         }
+
+        console.log(`사용자 ID: ${userId || '비회원'}, 목표 대학: ${targetUniv}`);
+
+        // 2. 모집요강 PDF 읽기 로직
+        let admissionGuideText = "해당 대학의 구체적인 모집요강 파일이 서버에 없습니다. 일반적인 입시 기준으로 분석합니다.";
+        if (targetUniv && UNIV_FILE_MAP[targetUniv]) {
+            try {
+                const downloadUrl = getGoogleDriveDownloadUrl(UNIV_FILE_MAP[targetUniv]);
+                const response = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
+                const pdfData = await pdfParse(Buffer.from(response.data));
+                
+                if (targetType) {
+                    admissionGuideText = extractRelevantPart(pdfData.text, targetType);
+                } else {
+                    admissionGuideText = pdfData.text.slice(0, 15000);
+                }
+            } catch (pdfErr) {
+                console.error("PDF 처리 중 오류 (무시하고 진행):", pdfErr.message);
+            }
+        }
+
+        // 3. AI 프롬프트 구성
+        const safeUserText = text.length > 25000 ? text.slice(0, 25000) + "...(생략)" : text;
+        const userInfo = req.session.user 
+            ? `학생 이름: ${req.session.user.name}, 학년: ${req.session.user.grade}` 
+            : "학생 정보: 미로그인 사용자";
+
+        const systemRole = `당신은 대한민국 최고의 입시 컨설턴트입니다. 
+        제공된 [학생 생기부]와 [대학 모집요강]을 분석하여 합격 전략을 제시하세요.`;
+
+        const userInstruction = `
+        [분석 대상]
+        ${userInfo}
+        - 목표: ${targetUniv || "미정"} ${targetMajor || "미정"} (${targetType || "미정"})
+
+        [모집요강 요약]
+        ${admissionGuideText.slice(0, 5000)}
+
+        [학생 생기부]
+        ${safeUserText}
+
+        위 내용을 바탕으로 다음을 분석하세요:
+        1. 서류 평가 요소별 점수 예측
+        2. 인재상 적합도 및 키워드 분석
+        3. 합격 가능성 제고를 위한 보완점
+        4. 교과 성적 등급대 추정
+        `;
+
+        // 4. OpenAI 호출
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemRole },
+                { role: 'user', content: userInstruction }
+            ],
+            temperature: 0.7
+        });
+
+        const analysisResult = response.choices[0].message.content;
+
+        // 5. DB 저장 (로그인한 경우에만)
+        if (userId) {
+            try {
+                const sql = `
+                    INSERT INTO analysis_history 
+                    (user_id, target_univ, target_major, extracted_text, analysis_result, analysis_type) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `;
+                // analysis_type이 없으면 'GENERAL'로 저장
+                await db.query(sql, [
+                    userId, 
+                    targetUniv || '', 
+                    targetMajor || '', 
+                    safeUserText, 
+                    analysisResult, 
+                    targetType || 'GENERAL'
+                ]);
+                console.log("DB 저장 완료");
+            } catch (dbErr) {
+                console.error("DB 저장 실패 (분석 결과는 반환함):", dbErr);
+                // DB 에러가 나도 사용자에겐 결과를 보여줘야 하므로 여기서 에러를 던지지 않음
+            }
+        }
+
+        // 결과 반환
+        res.json({ success: true, result: analysisResult });
+
+    } catch (err) {
+        console.error('SERVER ERROR (Analyze):', err);
+        res.status(500).json({ error: '서버 내부 오류 발생', detail: err.message });
     }
+});
+// [추가] 히스토리 목록 가져오기 API
+app.get('/api/history', async (req, res) => {
+    try {
+        const userId = req.query.user_id;
 
-    // 2. 프롬프트 구성
-    const safeUserText = text.length > 20000 ? text.slice(0, 20000) + "...(생략됨)" : text;
-    const userInfo = req.session && req.session.user 
-        ? `학생 이름: ${req.session.user.name}, 학년: ${req.session.user.grade}` 
-        : "학생 정보: 미로그인 사용자";
+        // 1. user_id가 제대로 왔는지 확인
+        if (!userId) {
+            return res.status(400).json({ success: false, error: 'User ID가 필요합니다.' });
+        }
 
-    let systemRole = `당신은 대한민국 최고의 입시 컨설턴트입니다. 
-    제공된 [학생 생기부]와 [대학 모집요강(발췌본)]을 정밀 대조 분석하여 합격 전략을 제시해야 합니다.
-    특히 모집요강에 명시된 평가 요소와 반영 비율을 근거로 학생을 냉철하게 평가하세요.`;
+        // 2. 보안 체크: 로그인한 사람과 요청한 사람의 ID가 같은지 확인 (선택 사항이지만 권장)
+        if (!req.session.user || req.session.user.id != userId) {
+             return res.status(401).json({ success: false, error: '권한이 없습니다.' });
+        }
 
-    let userInstruction = `
-    [분석 대상]
-    ${userInfo}
-    - 목표 대학: ${targetUniv || "미정"}
-    - 목표 학과: ${targetMajor || "미정"}
-    - 목표 전형: ${targetType || "미정"}
+        // 3. DB에서 기록 조회 (최신순 정렬)
+        // 주의: DB에 테이블 이름이 'analysis_history' 인지 확인하세요.
+        const sql = `
+            SELECT id, target_univ, target_major, created_at, analysis_type 
+            FROM analysis_history 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC
+        `;
+        
+        const [rows] = await db.query(sql, [userId]);
 
-    [대학 모집요강 데이터 (전형 관련 발췌)]
-    ${admissionGuideText}
+        // 4. 결과 반환
+        res.json({ success: true, data: rows });
 
-    [학생 생기부/성적 데이터]
-    ${safeUserText}
-
-    [요청 사항]
-    위 모집요강 데이터를 바탕으로 학생이 목표 전형(${targetType})에 적합한지 분석해주세요.
-    1. 모집요강에 명시된 '서류 평가 요소'별로 학생의 생기부를 매칭하여 점수를 예측해주세요.
-    2. 해당 대학의 인재상과 학생의 활동이 얼마나 일치하는지 구체적인 키워드를 사용하여 설명해주세요.
-    3. 합격 가능성을 높이기 위해 보완해야 할 점을 조언해주세요.
-    4. 보통 교과의 경우 등급을 확인하세요.(예 : 1등급, 2등급, 3등급, 4등급, 5등급 등 어디에 해당하는지)
-    `;
-
-    // 3. OpenAI 호출 (수정된 부분)
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o', // [중요] gpt-5.1은 존재하지 않습니다. gpt-4o 또는 gpt-4-turbo로 변경하세요.
-      messages: [
-        { role: 'system', content: systemRole },
-        { role: 'user', content: userInstruction }
-      ],
-      temperature: 0.7
-    });
-
-    // [중요] 응답 구조 확인 (안전 장치 추가)
-    if (!response || !response.choices || !response.choices[0]) {
-        console.error("OpenAI 응답 오류 (choices 없음):", response);
-        return res.status(500).json({ error: "AI 서버로부터 올바른 응답을 받지 못했습니다." });
+    } catch (err) {
+        console.error('히스토리 로딩 실패:', err);
+        res.status(500).json({ success: false, error: 'DB 조회 중 오류가 발생했습니다.' });
     }
+});
 
-    const message = response.choices[0].message;
-    if (message.refusal) {
-        return res.json({ result: `AI가 답변을 거절했습니다. 사유: ${message.refusal}` });
+// [추가] 히스토리 상세 내용 가져오기 API (목록 클릭 시 내용 볼 때 필요)
+app.get('/api/history/:id', async (req, res) => {
+    try {
+        const historyId = req.params.id;
+        const userId = req.session.user ? req.session.user.id : null;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, error: '로그인이 필요합니다.' });
+        }
+
+        const sql = `SELECT * FROM analysis_history WHERE id = ? AND user_id = ?`;
+        const [rows] = await db.query(sql, [historyId, userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, error: '기록을 찾을 수 없습니다.' });
+        }
+
+        res.json({ success: true, data: rows[0] });
+
+    } catch (err) {
+        console.error('상세 기록 로딩 실패:', err);
+        res.status(500).json({ success: false, error: '서버 오류' });
     }
-
-    res.json({ result: message.content });
-
-  } catch (err) {
-    console.error('analyze error:', err);
-    
-    let errorMsg = 'AI 분석 중 서버 오류가 발생했습니다.';
-    if (err.status === 401) errorMsg = 'OpenAI API 키가 잘못되었습니다.';
-    else if (err.status === 429) errorMsg = '요청량이 너무 많습니다. (Rate Limit Exceeded)';
-    
-    res.status(500).json({ error: errorMsg, detail: err.message });
-  }
 });
 app.post("/api/generate-essay-auto", async (req, res) => {
     try {
