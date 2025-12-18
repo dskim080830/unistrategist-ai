@@ -72,12 +72,12 @@ app.get('/special.html', (req, res) => res.sendFile(path.join(__dirname, 'specia
 app.get('/essay.html', (req, res) => res.sendFile(path.join(__dirname, 'essay.html')));
 
 const db = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '0830dsds',
-    database: process.env.DB_NAME || 'unistrategist',
-    waitForConnections: true,
-    connectionLimit: 10
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD, // 또는 process.env.DB_PASS (본인이 쓴 변수명 확인!)
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: { rejectUnauthorized: false } // <--- 필수!
 });
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -469,4 +469,5 @@ app.get('/api/essay-history', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 서버 실행 중 → http://localhost:${PORT}`);
+
 });
