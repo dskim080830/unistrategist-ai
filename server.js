@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise'); // promise 버전 사용
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const OpenAI = require('openai');
@@ -12,6 +12,7 @@ const pdfParse = require('pdf-parse');
 const axios = require('axios');
 const app = express();
 
+// 대학별 모집요강 PDF 매핑
 const UNIV_FILE_MAP = {
     "서울대학교" : "https://drive.google.com/file/d/1CNtmjhLL4nDoLjS0uOuqYsrJSITxsG8b/preview",
     "연세대학교" : "https://drive.google.com/file/d/1hucXBDJijeNwO6c53_xy-MoC2V9tOLre/preview",
@@ -72,21 +73,26 @@ app.get('/analysis', (req, res) => res.sendFile(path.join(__dirname, 'public', '
 app.get('/special.html', (req, res) => res.sendFile(path.join(__dirname, 'special.html')));
 app.get('/essay.html', (req, res) => res.sendFile(path.join(__dirname, 'essay.html')));
 
+// DB 연결 설정
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD, // 또는 process.env.DB_PASS (본인이 쓴 변수명 확인!)
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: process.env.DB_PORT,
-    ssl: { rejectUnauthorized: false } // <--- 필수!
+    ssl: { rejectUnauthorized: false }, // Render + Aiven 연결 필수 옵션
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// ----------------- 로그인/회원가입 API -----------------
+
 app.post("/login", async (req, res) => {
     try {
         const { username, password } = req.body;
-
         
         const [rows] = await db.query(
             "SELECT * FROM users WHERE username = ?",
@@ -104,7 +110,6 @@ app.post("/login", async (req, res) => {
             return res.send("<script>alert('비밀번호가 올바르지 않습니다.'); history.back();</script>");
         }
 
-        
         req.session.user = {
             id: user.id,
             username: user.username,
@@ -145,19 +150,15 @@ app.get('/school-search', async (req, res) => {
     }
 });
 
-
 app.post("/signup", async (req, res) => {
     try {
         const { username, password, name, birthdate, grade, school_name, school_code, consent } = req.body;
         
-        console.log("👉 회원가입 요청 데이터:", req.body);
-
         if(!username || !password || !name || !school_code) {
              return res.send("<script>alert('학교를 검색 목록에서 반드시 클릭해서 선택해주세요.'); history.back();</script>");
         }
 
         const hashed = await bcrypt.hash(password, 10);
-        
         const consentValue = consent ? 1 : 0;
 
         await db.query(
@@ -188,6 +189,7 @@ app.get("/api/session", (req, res) => {
     }
 });
 
+// 유틸리티 함수
 function extractRelevantPart(fullText, keyword) {
     if (!keyword || keyword.trim().length < 2) return fullText.slice(0, 15000);
     const lowerText = fullText.toLowerCase();
@@ -202,12 +204,16 @@ function getGoogleDriveDownloadUrl(previewUrl) {
     return `https://drive.google.com/uc?export=download&id=${id}`;
 }
 
-// ---------------- AI 분석 API (수정됨) ----------------
-app.post('/api/history', async (req, res) => {
+// ---------------- [수정됨] 생기부 분석 및 히스토리 API ----------------
+
+// 1. 생기부 분석 요청 (POST /api/analyze) - 기존 /api/history 에서 변경 및 기능 통합
+app.post('/api/analyze', async (req, res) => {
   req.setTimeout(300000); // 5분 타임아웃
 
   try {
-    const { text, analysisType, targetUniv, targetMajor, targetType } = req.body;
+    const { text, targetUniv, targetMajor, targetType } = req.body;
+    // user_id는 세션에서 가져옴 (없으면 null 처리하여 게스트 분석 가능하게 하거나 에러 처리)
+    const userId = req.session.user ? req.session.user.id : null;
     
     if (!text) return res.status(400).json({ error: '분석할 텍스트가 없습니다.' });
 
@@ -238,7 +244,7 @@ app.post('/api/history', async (req, res) => {
 
     // 2. 프롬프트 구성
     const safeUserText = text.length > 20000 ? text.slice(0, 20000) + "...(생략됨)" : text;
-    const userInfo = req.session && req.session.user 
+    const userInfo = req.session.user 
         ? `학생 이름: ${req.session.user.name}, 학년: ${req.session.user.grade}` 
         : "학생 정보: 미로그인 사용자";
 
@@ -267,9 +273,9 @@ app.post('/api/history', async (req, res) => {
     4. 보통 교과의 경우 등급을 확인하세요.(예 : 1등급, 2등급, 3등급, 4등급, 5등급 등 어디에 해당하는지)
     `;
 
-    // 3. OpenAI 호출 (수정된 부분)
+    // 3. OpenAI 호출
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o', // [중요] gpt-5.1은 존재하지 않습니다. gpt-4o 또는 gpt-4-turbo로 변경하세요.
+      model: 'gpt-4o', 
       messages: [
         { role: 'system', content: systemRole },
         { role: 'user', content: userInstruction }
@@ -277,29 +283,52 @@ app.post('/api/history', async (req, res) => {
       temperature: 0.7
     });
 
-    // [중요] 응답 구조 확인 (안전 장치 추가)
-    if (!response || !response.choices || !response.choices[0]) {
-        console.error("OpenAI 응답 오류 (choices 없음):", response);
-        return res.status(500).json({ error: "AI 서버로부터 올바른 응답을 받지 못했습니다." });
+    const analysisResult = response.choices[0].message.content;
+
+    // 4. DB에 히스토리 저장 (로그인한 경우만)
+    if (userId) {
+        const sql = `
+            INSERT INTO analysis_history 
+            (user_id, target_univ, target_major, extracted_text, analysis_result, analysis_type) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        // extracted_text는 너무 길 수 있으므로 생기부 앞부분만 저장하거나 전체 저장
+        await db.query(sql, [userId, targetUniv, targetMajor, safeUserText, analysisResult, targetType || 'GENERAL']);
     }
 
-    const message = response.choices[0].message;
-    if (message.refusal) {
-        return res.json({ result: `AI가 답변을 거절했습니다. 사유: ${message.refusal}` });
-    }
-
-    res.json({ result: message.content });
+    res.json({ success: true, result: analysisResult });
 
   } catch (err) {
     console.error('analyze error:', err);
-    
-    let errorMsg = 'AI 분석 중 서버 오류가 발생했습니다.';
-    if (err.status === 401) errorMsg = 'OpenAI API 키가 잘못되었습니다.';
-    else if (err.status === 429) errorMsg = '요청량이 너무 많습니다. (Rate Limit Exceeded)';
-    
-    res.status(500).json({ error: errorMsg, detail: err.message });
+    res.status(500).json({ error: '분석 중 서버 오류 발생', detail: err.message });
   }
 });
+
+// 2. 히스토리 목록 조회 (GET /api/history) - 404 에러 해결용
+app.get('/api/history', async (req, res) => {
+    try {
+        // 쿼리 파라미터에서 user_id 가져오기 (없으면 세션에서 시도)
+        const userId = req.query.user_id || (req.session.user ? req.session.user.id : null);
+
+        if (!userId) {
+            return res.status(400).json({ error: '로그인이 필요합니다.' });
+        }
+
+        const [rows] = await db.query(
+            'SELECT * FROM analysis_history WHERE user_id = ? ORDER BY created_at DESC',
+            [userId]
+        );
+        
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('히스토리 조회 에러:', error);
+        res.status(500).json({ error: 'DB 조회 중 오류가 발생했습니다.' });
+    }
+});
+
+
+// ---------------- 논술 관련 API ----------------
+
 app.post("/api/generate-essay-auto", async (req, res) => {
     try {
         const { pdfBase64, fileName, targetUniv, title } = req.body;
@@ -338,7 +367,7 @@ app.post("/api/generate-essay-auto", async (req, res) => {
         `;
 
         const response = await openai.chat.completions.create({
-            model: "gpt-5.1",
+            model: "gpt-4o", // [수정] gpt-5.1 -> gpt-4o
             messages: [
                 { role: "system", content: "Output strictly in JSON." },
                 { role: "user", content: prompt }
@@ -423,7 +452,7 @@ app.post('/api/grade-essay', async (req, res) => {
             `;
 
             const response = await openai.chat.completions.create({
-                model: "gpt-5.1",
+                model: "gpt-4o", // [수정] gpt-5.1 -> gpt-4o
                 temperature: 0.3,
                 messages: [
                     { role: "system", content: systemPrompt },
