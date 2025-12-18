@@ -197,6 +197,11 @@ function extractRelevantPart(fullText, keyword) {
     return fullText.slice(Math.max(0, idx - 200), idx + 2500);
 }
 
+function getGoogleDriveDownloadUrl(previewUrl) {
+    const id = previewUrl.split('/d/')[1].split('/')[0];
+    return `https://drive.google.com/uc?export=download&id=${id}`;
+}
+
 // ---------------- AI 분석 API (수정됨) ----------------
 app.post('/api/history', async (req, res) => {
   req.setTimeout(300000); // 5분 타임아웃
@@ -210,25 +215,24 @@ app.post('/api/history', async (req, res) => {
     let admissionGuideText = "해당 대학의 구체적인 모집요강 파일이 서버에 없습니다. 일반적인 입시 기준으로 분석합니다.";
     
     if (targetUniv && UNIV_FILE_MAP[targetUniv]) {
-        const pdfFileName = UNIV_FILE_MAP[targetUniv];
-        // 'susi' 폴더가 있는지 확인 필요. 없으면 경로 수정.
-        const pdfPath = path.join(__dirname, 'susi', pdfFileName);
+        const pdfUrl = UNIV_FILE_MAP[targetUniv];
+        const downloadUrl = getGoogleDriveDownloadUrl(pdfUrl);
 
-        if (fs.existsSync(pdfPath)) {
-            try {
-                console.log(`Reading PDF for ${targetUniv}: ${pdfPath}`);
-                const dataBuffer = fs.readFileSync(pdfPath);
-                const pdfData = await pdfParse(dataBuffer);
-                
-                if (targetType) {
-                    admissionGuideText = extractRelevantPart(pdfData.text, targetType);
-                } else {
-                    admissionGuideText = pdfData.text.slice(0, 15000);
-                }
-                
-            } catch (pdfErr) {
-                console.error("PDF parsing error:", pdfErr);
+        try {
+            console.log(`Downloading PDF for ${targetUniv}: ${downloadUrl}`);
+            const response = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
+            const dataBuffer = Buffer.from(response.data);
+            const pdfData = await pdfParse(dataBuffer);
+            
+            if (targetType) {
+                admissionGuideText = extractRelevantPart(pdfData.text, targetType);
+            } else {
+                admissionGuideText = pdfData.text.slice(0, 15000);
             }
+            
+        } catch (pdfErr) {
+            console.error("PDF download/parsing error:", pdfErr);
+            admissionGuideText = "PDF 다운로드 또는 파싱 중 오류가 발생했습니다. 일반적인 입시 기준으로 분석합니다.";
         }
     }
 
