@@ -265,19 +265,30 @@ select.input-text { appearance: none; cursor: pointer; background-image: url("da
 
     if(typeof lucide !== 'undefined') lucide.createIcons();
 
-   // [수정 1] 전역 변수로 유저 ID를 저장할 공간을 만듭니다.
-let currentUserId = null; 
+// [중요] 1. 유저 ID를 저장할 전역 변수를 선언합니다.
+let currentUserId = null;
 
 async function checkSession() {
     try {
-        const response = await fetch('/api/session', { headers: { 'Cache-Control': 'no-cache' }, cache: 'no-store' });
+        // 세션 정보 요청
+        const response = await fetch('/api/session', { 
+            headers: { 'Cache-Control': 'no-cache' }, 
+            cache: 'no-store' 
+        });
+
         if (response.ok) {
             const data = await response.json();
-            if (data.loggedIn) {
-                // [수정 2] 로그인 성공 시 ID를 변수에 저장합니다.
-                // (서버가 보내주는 JSON에 id 혹은 userId라는 필드가 있다고 가정합니다)
-                currentUserId = data.userId || data.id; 
+            
+            // [디버깅용] 콘솔창(F12)에서 서버가 주는 데이터를 확인하기 위함
+            console.log("Session Data:", data);
 
+            if (data.loggedIn) {
+                // [중요] 2. 서버 응답에서 ID를 찾아 변수에 저장합니다.
+                // (서버가 id, userId, user_id 중 무엇을 보내든 받아내도록 처리)
+                currentUserId = data.userId || data.id || data.user_id || data._id;
+                console.log("Saved UserID:", currentUserId); // ID가 잘 저장됐는지 확인
+
+                // 로그인 UI 업데이트
                 document.getElementById('navRight').innerHTML = `
                     <button class="btn-ghost" onclick="openHistoryModal()" style="margin-right:10px;">
                         <i data-lucide="history" style="width:18px; height:18px;"></i> 분석 기록
@@ -285,48 +296,75 @@ async function checkSession() {
                     <span style="margin-right:12px; font-weight:600; color:#333;">환영합니다, ${data.name}님</span>
                     <button class="btn-outline" onclick="location.href='/logout'">로그아웃</button>
                 `;
+                
+                // 아이콘 갱신
                 if(typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
-    } catch (err) {}
+    } catch (err) {
+        console.error("Session Check Error:", err);
+    }
 }
+
+// DOM 로드 시 세션 체크 실행
 document.addEventListener('DOMContentLoaded', checkSession);
 
+
 async function openHistoryModal() {
+    // 모달 열기
     document.getElementById('historyModal').classList.add('open');
     const list = document.getElementById('historyList');
     
+    // 로딩 표시
     list.innerHTML = `<li style="padding:30px; text-align:center; color:#999; font-size:13px;">기록을 불러오는 중...</li>`;
 
-    // [수정 3] ID가 없으면 요청을 보내기 전에 차단하거나 로그인을 유도합니다.
+    // [중요] 3. ID가 없는 경우(비로그인 or 로딩 전) 요청 차단
     if (!currentUserId) {
-        list.innerHTML = `<li style="padding:30px; text-align:center; color:#ef4444; font-size:13px;">사용자 정보를 찾을 수 없습니다.<br>새로고침 후 다시 시도해주세요.</li>`;
+        console.warn("User ID is missing. Cannot fetch history.");
+        list.innerHTML = `<li style="padding:30px; text-align:center; color:#ef4444; font-size:13px;">
+            로그인 정보를 확인할 수 없습니다.<br>
+            새로고침(F5) 후 다시 시도해주세요.
+        </li>`;
         return;
     }
 
     try {
-        // [수정 4] URL 뒤에 userId를 쿼리 파라미터로 붙여서 보냅니다.
-        // 예: /api/history?userId=test_user_1
-        const res = await fetch(`/api/history?userId=${currentUserId}`);
+        // [중요] 4. URL 뒤에 ID를 붙여서 요청 (Query Parameter)
+        const url = `/api/history?userId=${encodeURIComponent(currentUserId)}`;
+        console.log("Fetching History from:", url); // 요청 주소 확인용
+
+        const res = await fetch(url);
         
+        // 1. 비로그인 상태 (401 Unauthorized) 체크
         if (res.status === 401) {
             list.innerHTML = `<li style="padding:30px; text-align:center; color:#ef4444; font-size:13px;">로그인 세션이 만료되었습니다.<br>다시 로그인해주세요.</li>`;
             return;
         }
 
+        // 2. 그 외 서버 에러 체크 (400, 500 등)
         if (!res.ok) {
-            throw new Error(`서버 오류 발생 (Status: ${res.status})`);
+            // 에러 메시지를 서버에서 받아서 보여주기 위해 json 파싱 시도
+            let errorMsg = `Status: ${res.status}`;
+            try {
+                const errData = await res.json();
+                if (errData.error) errorMsg = errData.error;
+            } catch(e) {}
+            
+            throw new Error(errorMsg);
         }
 
         const data = await res.json();
         const history = data.history || [];
 
         list.innerHTML = '';
+        
+        // 기록이 없는 경우
         if(history.length === 0) {
             list.innerHTML = `<li style="padding:30px; text-align:center; color:#999; font-size:13px;">저장된 기록이 없습니다.</li>`;
             return;
         }
 
+        // 기록 렌더링
         history.forEach(item => {
             const li = document.createElement('li');
             li.className = 'history-item';
@@ -346,10 +384,13 @@ async function openHistoryModal() {
         });
 
     } catch(e) {
+        // 3. 실제 에러 내용을 브라우저 콘솔(F12)에 출력
         console.error("History Loading Error:", e);
+        
+        // 사용자에게는 서버 오류임을 알림
         list.innerHTML = `<li style="padding:30px; text-align:center; color:#ef4444; font-size:13px;">
             데이터를 불러오지 못했습니다.<br>
-            <span style="font-size:11px; color:#999;">(사유: ${e.message})</span>
+            <span style="font-size:11px; color:#999;">(오류: ${e.message})</span>
         </li>`;
     }
 }
@@ -599,3 +640,4 @@ async function openHistoryModal() {
 
 </body>
 </html>
+
