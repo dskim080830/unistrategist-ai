@@ -320,25 +320,25 @@ app.post('/api/analyze', async (req, res) => {
         res.status(500).json({ error: '서버 내부 오류 발생', detail: err.message });
     }
 });
-// [추가] 히스토리 목록 가져오기 API
+// [수정 완료] 히스토리 목록 가져오기 API
+// 프론트엔드에서 user_id를 안 보내도, 로그인된 세션에서 자동으로 가져오도록 개선
 app.get('/api/history', async (req, res) => {
     try {
-        const userId = req.query.user_id;
-
-        // 1. user_id가 제대로 왔는지 확인
-        if (!userId) {
-            return res.status(400).json({ success: false, error: 'User ID가 필요합니다.' });
+        // 1. 보안 체크: 로그인이 안 되어 있으면 튕겨냄
+        // (req.session.user가 없으면 로그인 안 한 것)
+        if (!req.session.user) {
+             return res.status(401).json({ success: false, error: '로그인이 필요합니다.' });
         }
 
-        // 2. 보안 체크: 로그인한 사람과 요청한 사람의 ID가 같은지 확인 (선택 사항이지만 권장)
-        if (!req.session.user || req.session.user.id != userId) {
-             return res.status(401).json({ success: false, error: '권한이 없습니다.' });
-        }
+        // 2. ID 가져오기: 굳이 프론트엔드에 물어보지 않고, 세션에서 직접 꺼냅니다.
+        // 이렇게 하면 "User ID가 필요합니다" 오류가 원천적으로 사라집니다.
+        const userId = req.session.user.id; 
 
-        // 3. DB에서 기록 조회 (최신순 정렬)
-        // 주의: DB에 테이블 이름이 'analysis_history' 인지 확인하세요.
+        console.log(`[History] 조회 요청 - UserID: ${userId}`); // 서버 로그 확인용
+
+        // 3. DB에서 기록 조회
         const sql = `
-            SELECT id, target_univ, target_major, created_at, analysis_type 
+            SELECT id, target_univ, target_major, created_at, analysis_type, analysis_result
             FROM analysis_history 
             WHERE user_id = ? 
             ORDER BY created_at DESC
@@ -347,7 +347,10 @@ app.get('/api/history', async (req, res) => {
         const [rows] = await db.query(sql, [userId]);
 
         // 4. 결과 반환
-        res.json({ success: true, data: rows });
+        // 프론트엔드에서 data.history로 찾고 있으므로, 형식을 맞춰줍니다.
+        res.json({ success: true, history: rows }); 
+        // 주의: 기존 코드는 data: rows 였으나, 프론트엔드는 data.history를 찾고 있었습니다.
+        // 만약 프론트엔드 수정 없이 쓰시려면 위처럼 history: rows 로 보내는 게 안전합니다.
 
     } catch (err) {
         console.error('히스토리 로딩 실패:', err);
